@@ -1,0 +1,1921 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<style>
+			/* https://stackoverflow.com/questions/31703153/bootstrap-jumbotron-full-width-and-height-of-window-with-background-image */
+.jumbotron{
+    height: 100vh;
+}
+.nextButton {
+  margin: 0 auto; /* horizontal alignment */
+  display: block;
+  font-size:14pt;
+  font-weight:bold
+}
+.dot {
+  height: 25px;
+  width: 25px;
+  background-color: #bbb;
+  border-radius: 50%;
+  display: inline-block;
+}
+#slider_demo {
+  max-height: 95vh;
+  max-width: 95%;
+}
+video
+{
+    max-height: 95vh;
+    max-width: 95%;
+}
+/* https://stackoverflow.com/questions/19461521/how-to-center-an-element-horizontally-and-vertically */
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100vw;
+  -moz-transform: translateX(-50%) translateY(-50%);
+  -webkit-transform: translateX(-50%) translateY(-50%);
+  transform: translateX(-50%) translateY(-50%);
+}
+.slider {
+  -webkit-appearance: none;
+  width: 70%;
+  height: 25px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #56a3f1;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #56a3f1;
+  cursor: pointer;
+}
+/* .center {
+    height: 100%;
+    display: -webkit-flexbox;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-align: center;
+    -ms-flex-align: center;
+    -webkit-align-items: center;
+    align-items: center;
+    justify-content: center;
+} */
+.imgcenter {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid #555;
+  /* width: 1000; */
+}
+			.stop {
+			 animation-name: none !important;
+			 -webkit-animation-name: none !important;
+			}
+    </style>
+		
+
+		<link href="https://s3.amazonaws.com/mturk-public/bs30/css/bootstrap.min.css" rel="stylesheet" />
+		<script src="https://s3.amazonaws.com/MTurks/jquery-1.11.2.min.js"></script>
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+		
+
+		<!-- <script src="//uniqueturker.myleott.com/lib.js" type="text/javascript"></script>
+<script type="text/javascript">
+
+//////////// example
+// opt.ut_id = 'unset'; % set this using http://uniqueturker.myleott.com/
+// (function(){
+//     var ut_id = "";
+//     if (UTWorkerLimitReached(ut_id)) {
+//         document.getElementById('mturk_form').style.display = 'none';
+//         document.getElementsByTagName('body')[0].innerHTML = "You have already completed the maximum number of HITs allowed by this requester. Please click 'Return HIT'.";
+//     }
+// })();
+</script> -->
+
+    <script type="text/javascript">
+      // https://stackoverflow.com/questions/24052775/how-to-get-the-console-log-content-as-string-in-javascript
+var logBackup = console.log;
+var logMessages = [];
+
+console.log = function() {
+    logMessages.push.apply(logMessages, arguments);
+    logBackup.apply(console, arguments);
+};
+			$(document).ready(function(){
+  var nVer = navigator.appVersion;
+  var nAgt = navigator.userAgent;
+  var browserName  = navigator.appName;
+  var fullVersion  = ''+parseFloat(navigator.appVersion);
+  var majorVersion = parseInt(navigator.appVersion,10);
+  var nameOffset,verOffset,ix;
+
+  // In Opera, the true version is after "Opera" or after "Version"
+  if ((verOffset=nAgt.indexOf("Opera"))!=-1) {
+   browserName = "Opera";
+   fullVersion = nAgt.substring(verOffset+6);
+   if ((verOffset=nAgt.indexOf("Version"))!=-1)
+     fullVersion = nAgt.substring(verOffset+8);
+  }
+  // In MSIE, the true version is after "MSIE" in userAgent
+  else if ((verOffset=nAgt.indexOf("MSIE"))!=-1) {
+   browserName = "Microsoft Internet Explorer";
+   fullVersion = nAgt.substring(verOffset+5);
+  }
+  // In Chrome, the true version is after "Chrome"
+  else if ((verOffset=nAgt.indexOf("Chrome"))!=-1) {
+   browserName = "Chrome";
+   fullVersion = nAgt.substring(verOffset+7);
+  }
+  // In Safari, the true version is after "Safari" or after "Version"
+  else if ((verOffset=nAgt.indexOf("Safari"))!=-1) {
+   browserName = "Safari";
+   fullVersion = nAgt.substring(verOffset+7);
+   if ((verOffset=nAgt.indexOf("Version"))!=-1)
+     fullVersion = nAgt.substring(verOffset+8);
+  }
+  // In Firefox, the true version is after "Firefox"
+  else if ((verOffset=nAgt.indexOf("Firefox"))!=-1) {
+   browserName = "Firefox";
+   fullVersion = nAgt.substring(verOffset+8);
+  }
+  // In most other browsers, "name/version" is at the end of userAgent
+  else if ( (nameOffset=nAgt.lastIndexOf(' ')+1) <
+            (verOffset=nAgt.lastIndexOf('/')) )
+  {
+   browserName = nAgt.substring(nameOffset,verOffset);
+   fullVersion = nAgt.substring(verOffset+1);
+   if (browserName.toLowerCase()==browserName.toUpperCase()) {
+    browserName = navigator.appName;
+   }
+  }
+  // trim the fullVersion string at semicolon/space if present
+  if ((ix=fullVersion.indexOf(";"))!=-1)
+     fullVersion=fullVersion.substring(0,ix);
+  if ((ix=fullVersion.indexOf(" "))!=-1)
+     fullVersion=fullVersion.substring(0,ix);
+
+  majorVersion = parseInt(''+fullVersion,10);
+  if (isNaN(majorVersion)) {
+   fullVersion  = ''+parseFloat(navigator.appVersion);
+   majorVersion = parseInt(navigator.appVersion,10);
+  }
+
+  var OSName="Unknown OS";
+  if (navigator.appVersion.indexOf("Win")!=-1) OSName="Windows";
+  if (navigator.appVersion.indexOf("Mac")!=-1) OSName="MacOS";
+  if (navigator.appVersion.indexOf("X11")!=-1) OSName="UNIX";
+  if (navigator.appVersion.indexOf("Linux")!=-1) OSName="Linux";
+
+  $("#systemInfo").val(''
+   +'Browser name  = '+browserName+'/'
+   +'Full version  = '+fullVersion+'/'
+   +'Major version = '+majorVersion+'/'
+   +'navigator.appName = '+navigator.appName+'/'
+   +'navigator.userAgent = '+navigator.userAgent+'/'
+   +'Your OS: '+OSName);
+
+ 	var screenH = window.screen.height;
+ 	var screenW = window.screen.width;
+ 	$("#screenSize").val(screenH+"/"+screenW);
+
+   console.log(''
+    +'Browser name  = '+browserName+'/'
+    +'Full version  = '+fullVersion+'/'
+    +'Major version = '+majorVersion+'/'
+    +'navigator.appName = '+navigator.appName+'/'
+    +'navigator.userAgent = '+navigator.userAgent+'/'
+    +'Your OS: '+OSName);
+});
+			// responsive design for mobile Interface
+
+// from http://stackoverflow.com/questions/15589764/how-to-hide-the-link-to-an-external-web-page-in-a-hit-before-workers-accept-the
+var isMobile = false; //initiate as false
+// device detection
+if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|ipad|iris|kindle|Android|Silk|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i.test(navigator.userAgent)
+    || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(navigator.userAgent.substr(0,4))) {
+    isMobile = true;
+}
+
+$(document).ready(function(){
+  // bigger font size for laptop users
+  if (!isMobile) {
+    var fontSize = parseInt($("body").css("font-size"));
+    fontSize = fontSize + 8 + "px";
+    $("body").css({'font-size':fontSize});
+    document.getElementById('slider_demo').src = 'https://mainstudy.s3.us-east-2.amazonaws.com/slider_demo_v3.png';
+  }
+});
+			/*
+// from http://stackoverflow.com/questions/15589764/how-to-hide-the-link-to-an-external-web-page-in-a-hit-before-workers-accept-the
+Amazon will pass variables in the url query string when opening your external web page. For this use case, you want to look at assignmentId. If assignmentId is ASSIGNMENT_ID_NOT_AVAILABLE the worker is previewing the HIT. (More info in the mturk docs.)
+
+You can grab those variables with the following javascript:
+
+
+var assignmentId = $.getUrlVar('assignmentId');
+var workerId = $.getUrlVar('workerId');
+var hitId = $.getUrlVar('hitId');
+if (assignmentId == "ASSIGNMENT_ID_NOT_AVAILABLE"){
+  // Worker is previewing the HIT
+}
+else {
+  // Worker has accepted the HIT
+}
+*/
+
+$.extend({
+  getUrlVars: function(){
+    // From http://code.google.com/p/js-uri/source/browse/trunk/lib/URI.js
+    var parser = /^(?:([^:\/?\#]+):)?(?:\/\/([^\/?\#]*))?([^?\#]*)(?:\?([^\#]*))?(?:\#(.*))?/;
+    var result = window.location.href.match(parser);
+    var scheme    = result[1] || null;
+    var authority = result[2] || null;
+    var path      = result[3] || null;
+    var query     = result[4] || null;
+    var fragment  = result[5] || null
+    if (query === null || query === undefined) {
+      return {};
+    }
+    var vars = [], hash;
+    var hashes = query.split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+      hash = hashes[i].split('=');
+      vars.push(hash[0]);
+      vars[hash[0]] = hash[1];
+    }
+    return vars;
+  },
+  getUrlVar: function(name){
+    return $.getUrlVars()[name];
+  }
+});
+			function setBodyHeight() {
+  var wh = $(window).height();
+  $('body').height(wh); // body height = window height
+}
+
+$(document).ready(function(){
+  $(window).bind('resize', function() {
+      setBodyHeight();
+  });
+});
+			var repeated = [];
+var backups = [];
+var t = {}; // training videos
+var p = {}; // testing videos, including repeated, golden, and label videos
+var backupIndex = 0; // assume we have enough backup videos
+var min_distance = 8;
+
+// function shuffle(array) {
+//   array.sort(() => Math.random() - 0.5);
+// }
+// https://javascript.info/task/shuffle
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function prepare_vid(name, index, arr, elements) {
+	if (typeof elements[index] !== 'undefined') {return;}
+	// if (arr == p.items ) {$("#selection"+(index+1)).attr('name', name);}
+
+	v = document.createElement('video');
+	v.muted = true;
+	v.name = name;
+	// type: 'video/mp4'
+	v.controls =  false ;
+	v.src = 'https://mainstudy.s3.us-east-2.amazonaws.com/' + name + '.mp4';
+	v.addEventListener("canplaythrough", function(){
+		if (index+1 < arr.length) {
+				prepare_vid(arr[index+1], index+1, arr, elements);
+		}
+	} );
+	
+	// if (arr == t.items & index == t.elements.length-1 ) {
+	// 	v.addEventListener("canplaythrough", function (e) {
+	// 	e.target.removeEventListener(e.type, arguments.callee);
+	// 	trainLoadTime();
+	// }	);}
+  if (arr == t.items ) {v.addEventListener("canplaythrough", trainLoadTime);}
+	// https://www.sitepoint.com/create-one-time-events-javascript/
+	v.addEventListener('error', function() {
+			$(this).remove();
+			new_name = backups[backupIndex];
+			console.log('Error when loading video '+v.name + '--Replaced with ' + new_name);
+			backupIndex++;
+			backupIndex = backupIndex % backups.length; // avoid array overflow
+
+			arr[index] = new_name;
+			elements[index] = undefined
+			prepare_vid(new_name, index, arr, elements);
+	});
+
+	elements[index] = v; // name --> video
+}
+
+$(document).ready(function(){
+
+  
+  backups.push('Backup/24000');
+  backups.push('Backup/24001');
+  backups.push('Backup/24002');
+  backups.push('Backup/24003');
+  backups.push('Backup/24004');
+  backups.push('Backup/24005');
+  backups.push('Backup/24006');
+  backups.push('Backup/24007');
+  backups.push('Backup/24008');
+  backups.push('Backup/24009');
+  backups.push('Backup/24010');
+  backups.push('Backup/24011');
+  backups.push('Backup/24012');
+  backups.push('Backup/24013');
+  backups.push('Backup/24014');
+  backups.push('Backup/24015');
+  backups.push('Backup/24016');
+  backups.push('Backup/24017');
+  backups.push('Backup/24018');
+  backups.push('Backup/24019');
+  backups.push('Backup/24020');
+
+  rand_num=[];
+
+  p.im_num = 0;
+  p.items = [];
+  p.initialized = false;
+  p.is_assigned = ($.getUrlVar('assignmentId') != 'ASSIGNMENT_ID_NOT_AVAILABLE');
+  p.practice_intro_shown = false;
+  p.experiment_intro_shown = false;
+  p.total_num_ims = 90;
+
+  // generate training items
+  t.im_num = 0;
+  t.items = [];
+  t.initialized = false;
+  t.is_assigned = ($.getUrlVar('assignmentId') != 'ASSIGNMENT_ID_NOT_AVAILABLE');
+  t.practice_intro_shown = false;
+  t.experiment_intro_shown = false;
+  t.total_num_ims = 5;
+
+  t.items = [];  t.items.push("Training/1");  t.items.push("Training/2");  t.items.push("Training/3");  t.items.push("Training/4");  t.items.push("Training/6"); 
+  p.items = [];  p.items.push("ia/session1/youtube-jwy-MVHa88A");  p.items.push("session1_amt_1k/501");  p.items.push("ia/session1/PolAd_EvanBayh_86lai");  p.items.push("session1_amt_1k/188");  p.items.push("ia/session1/Northeast_Middle_School_s_Environmental_Club_Activities_12-3-15");  p.items.push("session1_amt_1k/675");  p.items.push("ia/session1/wbrtvmi-Just_Peachy_-_The_Crowning_of_Lil_Miss_Peach_Blossom_Peachy_King");  p.items.push("session1_amt_1k/577");  p.items.push("ia/session1/youtube-X9ticuRBV3w");  p.items.push("session1_amt_1k/562");  p.items.push("ia/session1/Community_Connection_September_2017_Fridley_MN");  p.items.push("session1_amt_1k/428");  p.items.push("ia/session1/youtube-DRr-dOcMJDM");  p.items.push("session1_amt_1k/576");  p.items.push("ia/session1/The_A-List_-_Wendy_Snyder_Jimmy_Mac");  p.items.push("session1_amt_1k/135");  p.items.push("ia/session1/Spirit_Of_Shrewsbury_Fishing_Derby_2008");  p.items.push("session1_amt_1k/322");  p.items.push("ia/session1/Broad_Creek_Conservation_Easement");  p.items.push("session1_amt_1k/518");  p.items.push("ia/session1/NES_Longplay_305_The_Terminator");  p.items.push("session1_amt_1k/325");  p.items.push("ia/session1/youtube-OhWlvRlKd98");  p.items.push("session1_amt_1k/187");  p.items.push("ia/session1/ucberkeley_webcast_n1oMfGBiyFs");  p.items.push("session1_amt_1k/557");  p.items.push("ia/session1/thecosmonaut-r1p03");  p.items.push("session1_amt_1k/392");  p.items.push("ia/session1/StayinInTheSpiritInTheLastDays");  p.items.push("session1_amt_1k/678");  p.items.push("ia/session1/youtube-n1yvlnBHvPo");  p.items.push("session1_amt_1k/538");  p.items.push("ia/session1/youtube-7XuSNHtcV4s");  p.items.push("session1_amt_1k/774");  p.items.push("ia/session1/Do_Go_for_the_Week_Beginning_April_11_2013");  p.items.push("session1_amt_1k/647");  p.items.push("ia/session1/Connecting_Communities_-_LGBTQ_Liaison");  p.items.push("session1_amt_1k/670");  p.items.push("ia/session1/ucberkeley_webcast_K2K69nEXi90");  p.items.push("session1_amt_1k/475");  p.items.push("ia/session1/Planning_Board_meeting_from_June_26_2013");  p.items.push("session1_amt_1k/663");  p.items.push("ia/session1/D2_Boys_100_Fly_Heat_3");  p.items.push("session1_amt_1k/726");  p.items.push("ia/session1/One_Drop_-_Part_01");  p.items.push("session1_amt_1k/690");  p.items.push("ia/session1/cowomn-The_Development_Plan_-_City_Place");  p.items.push("session1_amt_1k/391");  p.items.push("ia/session1/On_Air_2014_2_-_CHS_Drama_Interview");  p.items.push("session1_amt_1k/302");  p.items.push("ia/session1/Board_of_Zoning_Appeals_-_10_01_15");  p.items.push("session1_amt_1k/145");  p.items.push("ia/session1/youtube-QsOeE2pkELk");  p.items.push("session1_amt_1k/124");  p.items.push("ia/session1/bliptv-20131011-105338-Amandacongdon-TheBisbee100WillBustYourButt679");  p.items.push("session1_amt_1k/731");  p.items.push("Backup/24991");  p.items.push("session1_amt_1k/581");  p.items.push("ia/session1/BeauSabreurTrailer");  p.items.push("session1_amt_1k/572");  p.items.push("ia/session1/Millburn_s_Downtown_Parking_Information");  p.items.push("session1_amt_1k/44");  p.items.push("ia/session1/ngtvma-Nantucket_Community_Preservation_Committee_-_3_19_19");  p.items.push("session1_amt_1k/626");  p.items.push("ia/session1/The_Moving_Wall_In_Kenner");  p.items.push("session1_amt_1k/516");  p.items.push("ia/session1/Fall_Street_Sweeping");  p.items.push("session1_amt_1k/652");  p.items.push("ia/session1/NES_Longplay_135_Duck_Tales_2");  p.items.push("session1_amt_1k/29");  p.items.push("ia/session1/fcoga-Fulton_Today_10-8-18");  p.items.push("session1_amt_1k/234");  p.items.push("ia/session1/RideMeToHeaven");  p.items.push("session1_amt_1k/75");  p.items.push("ia/session1/FelixTheCatFelixInHollywood1923");  p.items.push("session1_amt_1k/721");  p.items.push("ia/session1/youtube-8BbGY2v_w5s");  p.items.push("session1_amt_1k/264");  p.items.push("ia/session1/Random_Access_-_Square_Dancing");  p.items.push("session1_amt_1k/727");  p.items.push("ia/session1/SMC_SpeakUP_Somerville_LIVE_Telethon_-_Dave_Ortega");  p.items.push("session1_amt_1k/287"); 
+  p.items_not_shuffled = [];  p.items_not_shuffled.push("ia/session1/youtube-jwy-MVHa88A");  p.items_not_shuffled.push("session1_amt_1k/501");  p.items_not_shuffled.push("ia/session1/PolAd_EvanBayh_86lai");  p.items_not_shuffled.push("session1_amt_1k/188");  p.items_not_shuffled.push("ia/session1/Northeast_Middle_School_s_Environmental_Club_Activities_12-3-15");  p.items_not_shuffled.push("session1_amt_1k/675");  p.items_not_shuffled.push("ia/session1/wbrtvmi-Just_Peachy_-_The_Crowning_of_Lil_Miss_Peach_Blossom_Peachy_King");  p.items_not_shuffled.push("session1_amt_1k/577");  p.items_not_shuffled.push("ia/session1/youtube-X9ticuRBV3w");  p.items_not_shuffled.push("session1_amt_1k/562");  p.items_not_shuffled.push("ia/session1/Community_Connection_September_2017_Fridley_MN");  p.items_not_shuffled.push("session1_amt_1k/428");  p.items_not_shuffled.push("ia/session1/youtube-DRr-dOcMJDM");  p.items_not_shuffled.push("session1_amt_1k/576");  p.items_not_shuffled.push("ia/session1/The_A-List_-_Wendy_Snyder_Jimmy_Mac");  p.items_not_shuffled.push("session1_amt_1k/135");  p.items_not_shuffled.push("ia/session1/Spirit_Of_Shrewsbury_Fishing_Derby_2008");  p.items_not_shuffled.push("session1_amt_1k/322");  p.items_not_shuffled.push("ia/session1/Broad_Creek_Conservation_Easement");  p.items_not_shuffled.push("session1_amt_1k/518");  p.items_not_shuffled.push("ia/session1/NES_Longplay_305_The_Terminator");  p.items_not_shuffled.push("session1_amt_1k/325");  p.items_not_shuffled.push("ia/session1/youtube-OhWlvRlKd98");  p.items_not_shuffled.push("session1_amt_1k/187");  p.items_not_shuffled.push("ia/session1/ucberkeley_webcast_n1oMfGBiyFs");  p.items_not_shuffled.push("session1_amt_1k/557");  p.items_not_shuffled.push("ia/session1/thecosmonaut-r1p03");  p.items_not_shuffled.push("session1_amt_1k/392");  p.items_not_shuffled.push("ia/session1/StayinInTheSpiritInTheLastDays");  p.items_not_shuffled.push("session1_amt_1k/678");  p.items_not_shuffled.push("ia/session1/youtube-n1yvlnBHvPo");  p.items_not_shuffled.push("session1_amt_1k/538");  p.items_not_shuffled.push("ia/session1/youtube-7XuSNHtcV4s");  p.items_not_shuffled.push("session1_amt_1k/774");  p.items_not_shuffled.push("ia/session1/Do_Go_for_the_Week_Beginning_April_11_2013");  p.items_not_shuffled.push("session1_amt_1k/647");  p.items_not_shuffled.push("ia/session1/Connecting_Communities_-_LGBTQ_Liaison");  p.items_not_shuffled.push("session1_amt_1k/670");  p.items_not_shuffled.push("ia/session1/ucberkeley_webcast_K2K69nEXi90");  p.items_not_shuffled.push("session1_amt_1k/475");  p.items_not_shuffled.push("ia/session1/Planning_Board_meeting_from_June_26_2013");  p.items_not_shuffled.push("session1_amt_1k/663");  p.items_not_shuffled.push("ia/session1/D2_Boys_100_Fly_Heat_3");  p.items_not_shuffled.push("session1_amt_1k/726");  p.items_not_shuffled.push("ia/session1/One_Drop_-_Part_01");  p.items_not_shuffled.push("session1_amt_1k/690");  p.items_not_shuffled.push("ia/session1/cowomn-The_Development_Plan_-_City_Place");  p.items_not_shuffled.push("session1_amt_1k/391");  p.items_not_shuffled.push("ia/session1/On_Air_2014_2_-_CHS_Drama_Interview");  p.items_not_shuffled.push("session1_amt_1k/302");  p.items_not_shuffled.push("ia/session1/Board_of_Zoning_Appeals_-_10_01_15");  p.items_not_shuffled.push("session1_amt_1k/145");  p.items_not_shuffled.push("ia/session1/youtube-QsOeE2pkELk");  p.items_not_shuffled.push("session1_amt_1k/124");  p.items_not_shuffled.push("ia/session1/bliptv-20131011-105338-Amandacongdon-TheBisbee100WillBustYourButt679");  p.items_not_shuffled.push("session1_amt_1k/731");  p.items_not_shuffled.push("Backup/24991");  p.items_not_shuffled.push("session1_amt_1k/581");  p.items_not_shuffled.push("ia/session1/BeauSabreurTrailer");  p.items_not_shuffled.push("session1_amt_1k/572");  p.items_not_shuffled.push("ia/session1/Millburn_s_Downtown_Parking_Information");  p.items_not_shuffled.push("session1_amt_1k/44");  p.items_not_shuffled.push("ia/session1/ngtvma-Nantucket_Community_Preservation_Committee_-_3_19_19");  p.items_not_shuffled.push("session1_amt_1k/626");  p.items_not_shuffled.push("ia/session1/The_Moving_Wall_In_Kenner");  p.items_not_shuffled.push("session1_amt_1k/516");  p.items_not_shuffled.push("ia/session1/Fall_Street_Sweeping");  p.items_not_shuffled.push("session1_amt_1k/652");  p.items_not_shuffled.push("ia/session1/NES_Longplay_135_Duck_Tales_2");  p.items_not_shuffled.push("session1_amt_1k/29");  p.items_not_shuffled.push("ia/session1/fcoga-Fulton_Today_10-8-18");  p.items_not_shuffled.push("session1_amt_1k/234");  p.items_not_shuffled.push("ia/session1/RideMeToHeaven");  p.items_not_shuffled.push("session1_amt_1k/75");  p.items_not_shuffled.push("ia/session1/FelixTheCatFelixInHollywood1923");  p.items_not_shuffled.push("session1_amt_1k/721");  p.items_not_shuffled.push("ia/session1/youtube-8BbGY2v_w5s");  p.items_not_shuffled.push("session1_amt_1k/264");  p.items_not_shuffled.push("ia/session1/Random_Access_-_Square_Dancing");  p.items_not_shuffled.push("session1_amt_1k/727");  p.items_not_shuffled.push("ia/session1/SMC_SpeakUP_Somerville_LIVE_Telethon_-_Dave_Ortega");  p.items_not_shuffled.push("session1_amt_1k/287"); 
+
+
+  var arr = [];
+
+  while(arr.length < 4){
+    var r = Math.floor(Math.random() * 82 );
+    if(arr.indexOf(r) === -1){
+      p.items.push(p.items[r]);
+      repeated.push(p.items[r]);
+      arr.push(r);
+    }
+  } // https://stackoverflow.com/a/2380113
+
+   p.items.push("GoldenK/A");  p.items.push("GoldenK/B");  p.items.push("GoldenK/C");  p.items.push("GoldenK/D"); 
+
+  // now insert repeated videos
+  shuffle(p.items);
+
+  
+  // it will change the arr dyncamically...
+  repeated.forEach( function(v, idx) {
+    // find occurances:
+    first = p.items.indexOf(v);
+    second = p.items.indexOf(v, first+1);
+
+    if (second - first < min_distance) {
+      console.log('-------Distance change: ' + idx + ':' + first + '-' +  second)
+      var i = second
+      var j = ( first + min_distance ) % p.total_num_ims;
+      [p.items[i], p.items[j]] = [p.items[j], p.items[i]];
+    }
+  } );
+  
+  // repeated video is bad video?
+  // only show a few repeated pairs (not in the repeated list)
+
+  // p.items.forEach( function(v, index, arr) {
+  // 	$("#selection"+(index+1)).attr('name', v.name);
+  // } );
+
+  p.elements = []
+  t.elements = []
+
+  // load one by one or in parallel
+  load_start = performance.now();
+  shuffle(backups); // avoid getting too many ratings on the first backup videos
+  prepare_vid(t.items[0], 0, t.items, t.elements);
+  prepare_vid(p.items[0], 0, p.items, p.elements);
+
+
+});
+			// Rejection during instruction phase
+var score_diff = [];
+var sd1 = 10;
+var scores = [];
+var sd2 = 10;
+var train_delay = 0;
+// Number of Stalls
+var stall_count = 0;
+var score_diff = [];
+var delay = 0;
+var load_start = 0;
+var load_end = 0;
+var loadTime;
+var loadThresh = 20; //null;
+var trainc = 0;
+
+function rejected(msg, retry=true) {
+	
+		if(retry==false) {
+			msg = 'You may have violated one of our Ethics policies. Please return the HIT.';
+		}
+	
+
+	// show the rejection page
+	// You did not satisfy the requirements for this study. Please return the HIT
+	console.log('user [' + $.getUrlVar('assignmentId') + '] rejected because of ' + msg);
+
+	$('#submitButton').remove();
+	// record information?
+	$('#divRejected').show();
+	$('#instruction').hide();
+	$('.slidecontainer').hide();
+	$('#reasonRejected').html(msg);
+	$('#survey_box').animate({right: '-100%'});
+	$('#divNextButton').hide();
+}
+
+function standardDeviation(values){
+  var avg = average(values);
+
+  var squareDiffs = values.map(function(value){
+    var diff = value - avg;
+    var sqrDiff = diff * diff;
+    return sqrDiff;
+  });
+
+  var avgSquareDiff = average(squareDiffs);
+
+  var stdDev = Math.sqrt(avgSquareDiff);
+  return stdDev;
+}
+
+function average(data){
+  var sum = data.reduce(function(sum, value){
+    return sum + value;
+  }, 0);
+
+  var avg = sum / data.length;
+  return avg;
+}
+
+// var gold_scores = [20,30,40,50];
+// Browser resolution
+function rejectBrowserRes() {
+  var wh = $(window).height();
+  var ww = $(window).width();
+  $("#browserWindowSize").val(wh+' / '+ww);
+  console.log("Browser Height: " + wh + " / " + "Browser Width: " + ww );
+  if(isMobile) {
+    if(wh < 640 && ww < 360) {
+      rejected('The mobile browser resolution is too small for this study. Please return the HIT.');
+    }
+  }
+  else {
+    if(wh < 720 && ww < 1280) {
+      rejected('The desktop browser resolution is too small for this study. Please return the HIT.');
+    }
+  }
+}
+
+// Browser Version
+function rejectBrowser(){
+  var browsers = navigator.appName;
+  // var broswerVers = navigator.appVersion;
+  var browserVers = parseInt(navigator.appVersion,10);
+  if(browsers != "Netscape" && browsers != "Opera") {
+    rejected('Your browser is not compatible with this study. Please return the HIT and try with another browser.');
+  }
+  if(browserVers < 5){
+    rejected('Please return the HIT. Update your browser and try again.');
+  }
+}
+// Browser zoom
+function rejectBrowserZoom(){
+	pr = window.devicePixelRatio;
+	pr = parseFloat(pr.toFixed(2));
+	pr1 = Math.abs(pr-1);
+	pr2 = Math.abs(pr-2);
+	console.log("Browser zoom: " + pr);
+	if((pr1 > 0) && (pr2 > 0)){
+		alert('Please check if the browser zoom is set to 100%. If not, you can set it by pressing Ctrl+0 or Cmd+0.')
+	}
+}
+// Loading Time
+function trainLoadTime(){
+    load_end = performance.now();
+		trainc += 1;
+		if(trainc==5){
+	    loadTime = (load_end - load_start)/1000;
+	    console.log("Loading time: " + loadTime);
+
+	    if (loadTime > loadThresh){
+	      rejected('Your internet connection is too slow for this study. You could try again after getting a faster connection.');
+	    }
+		}
+}
+
+// Rejection during training phase
+
+// Stalls and spped up
+function checkStalls(){
+  var singleDelay = 2;
+  var totDelay = 5;
+  if (delay > singleDelay || train_delay > totDelay){
+    rejected('Your internet connection is too slow for this study. You could try again after getting a faster connection.');
+  }
+  if ( train_delay < -0.5) {
+    rejected('speedup', retry=false);
+  }
+}
+
+//Rejection during testing phase (halfway)
+
+// Diff of points
+// var sd1 = 10;
+
+
+function checkDiffSD(){
+  var diffSD = standardDeviation(score_diff);
+  console.log("diffSD: " + diffSD);
+  if(diffSD < 10){
+    rejected('checkDiffSD', retry=false);
+  }
+}
+
+// Score Consistency
+
+
+function checkScoreConsistency(){
+  var conSD = standardDeviation(scores);
+  console.log("conSD: " + conSD);
+  if(conSD < 10){
+    rejected('checkScoreConsistency', retry=false);
+  }
+}
+
+// Check stalls
+function checkStallCount(){
+  console.log("stall count:" + stall_count);
+  if(stall_count > 15){
+    rejected('Your internet connection is too slow for this study. You could try again after getting a faster connection.');
+  }
+}
+
+// //Rejection during survey
+//
+// //Repeated videos
+// fault_repeat = 0;
+// // for repeated idx, push to array
+// if(diff>sd2){
+//   fault_repeat += 1;
+// }
+// function checkRepeatDiffs(){
+//   if(fault_repeat>2){
+//     rejected('You did not satisfy the requirements for this study. Please return the HIT.');
+//   }
+// }
+//
+// // // Golden videos
+// fault_golden = 0;
+// if(diff>20){
+//   fault_golden += 1;
+// }
+// function checkGoldenDiffs(){
+//   if(fault_repeat>2){
+//     rejected('You did not satisfy the requirements for this study. Please return the HIT.');
+//   }
+// }
+
+// Check lens correction
+// Do after the study
+
+$(document).ready(function(){
+		$( window ).load(function() {
+		  // Run code
+		  rejectBrowserRes();
+		  rejectBrowser();
+			rejectBrowserZoom();
+
+		  $( "#sub_butA" ).on({
+		    rejection_check: function() {
+		      if (phase == 'test') {
+		        var final_val = document.getElementById("points").value
+		        var init_val = sessionStorage['initialVal'] || 'defaultValue';
+		  			d = Math.abs(parseInt(final_val,10) - parseInt(init_val,10));
+		  			score_diff.push(d);
+		  			scores.push(parseInt(final_val,10));
+
+		  			if (p.im_num == parseInt(90/2) ){
+							console.log('halfway rejection check!!!')
+		  				checkDiffSD();
+		  				checkStallCount();
+		          checkScoreConsistency();
+		  			};
+
+		        // check at end of testing phase
+		        // if (p.im_num == 90){
+		        //   for (var i=0, len=p.items.length; i<len; i++) {
+		        //     if (p.items[i].videotype == 'gold') {
+		        //
+		        //     }
+		        //   }
+		        //   p.items.forEach( function(v, index) {
+		        //     switch (v.videotype) {
+		        //       case 'gold':
+		        //         break;
+		        //       case 'repeat':
+		        //         break;
+		        //       default:
+		        //         break;
+		        //     }
+		        //   } );
+		        // };
+		  		// }
+
+		      // checkGoldenDiffs();
+		      // checkRepeatDiffs();
+
+		    }
+		  }
+		  });
+		});
+}); // before main_logic
+      var phase = "instruction"
+
+function assert(x, msg) { if (!x) { throw("Assertion failed: " + msg); } }
+function now() { return (new Date()).getTime() / 1000.; }
+
+function hide_all() {
+	$('#instruction').hide();
+	$('#quiz').hide();
+	$('#survey').hide();
+
+	$('.slidecontainer').hide();
+	$('#divRejected').hide();
+	$('#imageA').hide();
+	$('#buttonA').hide();
+}
+
+function instruction() {
+	hide_all();
+	$('#instruction').show();
+}
+
+function quiz() {
+	hide_all();
+	$('#quiz').show();
+}
+
+function pre_train() {
+	if (p == null) return;
+	hide_all();
+	$('#phase_info').html("You are entering the training session. Click to Continue.");
+	$('#nextButton').html('Continue');
+	$('#divNextButton').show();
+}
+
+function pre_test() {
+	hide_all();
+	// $('#main-slider').animate({top: '-2000px'});
+	$('#phase_info').html("You are entering the testing session. Click to Continue.");
+	$('#divNextButton').show();
+}
+
+// combine train and test function
+function run(vids) {
+	$('#instruction').hide();
+	$('.slidecontainer').show();
+	$('#main-slider').hide();
+	$('#attributes').hide();
+	$('#report_video').hide();
+	// make sure all videos are .mp4 lower case
+
+	// show video
+	var t0 = performance.now();
+	document.getElementById("divVideo").appendChild(vids.elements[vids.im_num]);
+	vids.elements[vids.im_num].play();
+	var dur = vids.elements[vids.im_num].duration;
+	console.log(dur);
+	vids.elements[vids.im_num].onended = function() {
+		// video done playing
+		var t1 = performance.now();
+		delay =  ((t1 - t0)/1000) - dur;
+
+		train_delay += delay;
+		if (phase == 'train') {
+			checkStalls();
+		}
+		if (phase == 'test') {
+			if(delay > 1){
+			  stall_count += 1;
+			}
+		}
+
+		sessionStorage['delay'] = delay;
+		console.log("Time taken: " + (t1 - t0)/1000);
+		console.log("Train Delay: " + train_delay);
+		this.remove();
+		// $('#main-slider').animate({top: '0px'}, 'fast');
+		$('#main-slider').show();
+		$('#points').change(function(){$('#buttonA').show();$('#report_video').show(); $('#sub_butA').prop('disabled', false);});
+	}
+
+	$('#submit_info').html((vids.im_num+1) + " out of " + (vids.total_num_ims));
+	// $('#short_instructions').html("Please drag the slider to indicate the quality you see.");
+	// init ui
+	$('#divNextButton').hide();
+	// prepare UI
+	// $('#imageA').show()
+	// $('#imageA').load()
+	var init_val = Math.floor(Math.random() * 100);
+	sessionStorage['initialVal'] = init_val;
+
+	document.getElementById('points').value = init_val;
+	document.getElementById('inappropriate').checked = false;
+	document.getElementById('corrupt').checked = false;
+	document.getElementById('other').checked = false;
+	$('#textbox').hide();
+	document.getElementById("textbox_input").value = "";
+	$('#short_instructions').show();
+	$('#buttonA').hide();
+}
+
+function survey() {
+	// $('#instruction').hide();
+  // $('#report_video').hide();
+	// $('.slidecontainer').hide();
+	hide_all();
+	$('#survey').show();
+	$('#short_instructions').detach();
+	// $('#divNextButton').show();
+	// $('#nextButton').addAttr("disabled");
+	// $('#nextButton').prop("disabled", true);
+}
+
+function done() {
+	// configuration and thanks
+	alert('Well done! Click the submit button');
+	// $('#survey_box').animate({right: '-100%'});
+	$('#survey').hide();
+	$('#divNextButton').hide();
+	$("#submitButton").show();
+  $("#submitButton").prop('disabled', false);
+	$("#submitButton").css("visibility", "visible");
+
+	$('#debugInfo').val(p.items.join(';'));
+	$('<input/>').attr({type:'hidden',name:'welldone',value:'yes'}).appendTo('#survey');
+}
+
+function next(_phase=phase) {
+	phase = _phase
+	console.log('[' + phase + ']');
+	
+
+  // update phase
+  switch (phase) {
+		case 'instruction':
+			instruction();
+			phase = 'quiz';
+			break;
+		case 'quiz':
+			quiz();
+			phase = 'pre_train';
+			break;
+		case 'pre_train':
+			pre_train();
+			phase = 'train';
+			break;
+		case 'train':
+			run(t);
+			t.im_num=t.im_num+1;
+			if (t.im_num == t.total_num_ims) { phase = 'pre_test'; }
+			break;
+		case 'pre_test':
+			pre_test();
+			phase = 'test';
+			break;
+    case 'test':
+			// if (p.elements[p.im_num].readyState != 4) {
+			// 	let spinner = $('#wait').find('span')
+			// 	spinner.removeClass('d-none')
+			// 	p.elements[p.im_num].addEventListener("ended", function(){
+			// 		spinner.addClass('d-none');
+			// 		next();
+			// 	});
+			// 	return;
+			// }
+
+			// prepare next video
+			prepare_vid(p.items[p.im_num+1], 0, p.items, p.elements);
+			run(p);
+			p.im_num=p.im_num+1;
+			if (p.im_num == p.total_num_ims) { phase = 'survey'; }
+			// else {
+			// 	if ( p.elements[p.im_num].readyState === 4 ) {
+			// 		console.log('Next video is already loaded' + p.elements[p.im_num].name);
+			// 	} else {
+			// 		// p.elements[p.im_num].load();
+			// 		console.log('Next video is not ready: ' + p.elements[p.im_num].name + ':' + p.elements[p.im_num+1].readyState);
+			// 	}
+			// }
+
+			// if next is not loaded
+			// run(p);
+			// p.im_num=p.im_num+1;
+			// if (p.im_num == p.total_num_ims) { phase = 'survey'; }
+			break;
+		case 'survey':
+			survey();
+			// show next only when all fields are filled in
+			phase = 'done';
+			break;
+		case 'done':
+			done();
+			break;
+		case 'rejected':
+			break;
+    default:
+      break;
+  }
+}
+
+
+function submitAnswer() {
+		// update user interface ----------------------------
+		// $('#main-slider').animate({top: '-2000px'});
+		$('#buttonA').hide();
+
+		// recording information -----------------------------
+		var final_val = document.getElementById("points").value
+		var init_val = sessionStorage['initialVal'] || 'defaultValue';
+		var delay = sessionStorage['delay'] || 'defaultValue';
+		var var2 = [];
+		var var3 = null;
+		if(document.getElementById("inappropriate").checked){
+			var2.push("  inappropriate  ");
+		}
+		if(document.getElementById("corrupt").checked){
+			var2.push("  corrupt  ");
+		}
+    if(document.getElementById("still").checked){
+			var2.push("  still  ");
+		}
+    if(document.getElementById("misoriented").checked){
+			var2.push("  misoriented  ");
+		}
+		if(document.getElementById("other").checked){
+			var2.push("  other_");
+			var3 = document.getElementById("textbox_input").value;
+			var2.push(var3)
+		}
+
+		// select the correct index
+		var name = p.items[p.im_num-1]
+		var r = p.items_not_shuffled.indexOf(name)
+
+		// golden video or label video
+		if (r == -1) {selected = $("input[name='" + name + "']");} else {selected = $("#videos"+(r+1)); } // double-checked, r start with 0 while videos start with 1
+		// selected = $("#selection"+(p.im_num)) // be carefull +1 -1
+
+		if (selected.val() == "unset") {
+			selected.val(init_val+"/"+final_val+"/" + var2 + "/" + delay);
+		} else { // append the value
+			selected.val(selected.val() + ' | ' + init_val+"/"+final_val+"/" + var2 + "/" + delay);
+		}
+
+		console.log( selected.attr('name') + ' ---> ' + selected.val() );
+    $("#status"+p.im_num).css("background-color", "green");
+		$('#sub_butA').attr("disabled",true);
+
+		// rejection ----------------------------------
+    $('#sub_butA').trigger('rejection_check');
+    next();
+}
+
+$(document).ready(function(){
+	// ui --------------------------
+
+  $("#submitButton").hide(); // not working on AMT anymore, why?
+  $("#submitButton").prop('disabled', true);
+  if (p.is_assigned) {
+      $('#nextButton').removeAttr('disabled');
+      $('#nextButton').html('Start!');
+  }
+
+
+  next(); // phase = 'instruction'
+
+//   $(document).keyup(function(e) {
+//      if (e.key === "Escape") { // escape key maps to keycode `27`
+//         // <DO YOUR WORK HERE>
+//
+//   			alert('Browser is in not in fullscreen');
+// 				openFullscreen();
+//
+//     }
+// };);
+});
+    </script>
+  </head>
+  <body>
+		
+
+<div class="slidecontainer" width="100%" align="center">
+    <!-- style="position:relative; width:100%" align="center" -->
+    <div class="center" width="100%" id='divVideo'>
+    </div>
+    <div class="center">
+        <div id='main-slider' class='box'>
+            <div id="feedback" align=center style="display:none"></div>
+            <div id="trial_num" style="display:none"></div>
+            <div id="short_info" align="center" style="width: 80%; margin: 0 auto; text-align: left; display:none" align=c enter></div>
+            <div id="slider_info" align=center>
+                Please drag the slider to indicate the quality you saw.
+                <br>Focus on the <b>quality</b> instead of the content.
+                <br>(The initial position of the slider is placed at random.)</div>
+            <div id="short_instructions" style="display:none;"></div>
+            <br />
+
+            <div class="steps" style="display: flex; justify-content: space-between; width:80%; position:relative; font-size:small;" align="center">
+                <span style="display:inline-block;width:19%;text-align:center;">
+                   BAD
+                </span>
+                <span style="display:inline-block;width:19%;text-align:center;">
+                   POOR
+                </span>
+                <span style="display:inline-block;width:19%;text-align:center;">
+                   FAIR
+                </span>
+                <span style="display:inline-block;width:19%;text-align:center;">
+                   GOOD
+                </span>
+                <span style="display:inline-block;width:19%;text-align:center;">
+                   EXCELLENT
+                </span>
+            </div>
+            <input type="range" class="slider" name="points" id="points" value="50" min="0" max="100" data-show-value="false" style="position:relative; height:10px; width:80%;" align="center">
+            <!-- <div class="steps" style="position:relative; font-size:small;" align="center">
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+              <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+            </div> -->
+            <br/>
+            <div class="steps" style="display: flex; justify-content: space-between; position:relative; font-size:small; width:87%" align="center">
+              <span style="display:inline-block;width:8%;text-align:center;"> 0 </span>
+              <span style="display:inline-block;width:8%;text-align:center;"> 10 </span>
+              <span style="display:inline-block;width:8%;text-align:center;"> 20 </span>
+              <span style="display:inline-block;width:8%;text-align:center;"> 30 </span>
+              <span style="display:inline-block;width:8%;text-align:center;"> 40 </span>
+              <span style="display:inline-block;width:8%;text-align:center;"> 50 </span>
+              <span style="display:inline-block;width:8%;text-align:center;"> 60 </span>
+              <span style="display:inline-block;width:8%;text-align:center;"> 70 </span>
+              <span style="display:inline-block;width:8%;text-align:center;"> 80 </span>
+              <span style="display:inline-block;width:8%;text-align:center;"> 90 </span>
+              <span style="display:inline-block;width:8%;text-align:center;"> 100 </span>
+            </div>
+
+
+            <br>
+            <br>
+            <br>
+        </div>
+
+        <div id="buttonA" style="position:relative;" title="You must move the slider before submitting!"
+        data-toggle="popover" data-placement="bottom" data-content="You must move the slider before submitting!"
+        >
+            <div id="submit_info" style="font-size:medium;"></div>
+            <button class="btn btn-primary btn-xl nextButton" id="sub_butA" type="button" onclick="submitAnswer()" style="position:relative;">
+                Submit
+            </button>
+            <br/>
+            <br/>
+            <div id="report_video" style="font-size:small;">
+              <a id="report_but" data-toggle="modal" data-target="#attributes">
+                &nbsp; &#9873; Report &nbsp; &nbsp;
+              </a>
+            </div>
+        </div>
+
+    </div>
+    <br>
+    <br>
+</div>
+
+
+<!-- Button trigger modal -->
+  <!-- <p  style="font-size:12pt"><nobr>Do you want to report the video?</nobr></p> -->
+<!-- <div id="report_video" class="footer navbar-fixed-bottom" style="position:absolute; font-size:small;display:none"  align="left">
+  <a id="report_but" data-toggle="modal" data-target="#attributes">
+    &nbsp;&nbsp;&#9873; Report
+  </a>
+</div> -->
+
+<!-- Modal -->
+<div class="modal fade" id="attributes" tabindex="-1" role="dialog" aria-labelledby="attributes" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">State your reason(s):</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body"  style="font-size:medium;">
+        <ul style="list-style-type:none; position:relative;">
+            <li>
+                <input type="checkbox" id="inappropriate" name="inappropriate" value="inappropriate">
+                <label for="inappropriate">Pornographic Content</label>
+            </li><li>
+                <input type="checkbox" id="corrupt" name="corrupt" value="corrupt">
+                <label for="corrupt">Violent Content</label>
+            </li><li>
+                <input type="checkbox" id="still" name="still" value="still">
+                <label for="still">Still Scenes</label>
+            </li><li>
+                <input type="checkbox" id="misoriented" name="misoriented" value="misoriented">
+                <label for="misoriented">Misoriented</label>
+            </li><li>
+                <input type="checkbox" id="other" name="other" value="other" onClick="$('#textbox').toggle()">
+                <label for="other">Other</label>
+            </li>
+        </ul>
+        <div id="textbox" style="display: none;">
+            <p>What is(are) your reason(s)?</p>
+            <input id="textbox_input" type="text" name="otherAnswer" value="">
+            <br>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <!-- <button type="button" class="btn btn-secondary btn-xl" data-dismiss="modal">Close</button> -->
+        <button type="button" class="btn btn-primary btn-xl" data-dismiss="modal" onclick="submitAnswer();$('#attributes').find('input[type=checkbox]:checked').removeAttr('checked');">Report</button>
+        <!-- thank you for  your report -->
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <!-- <div id="attributes" style="display: none;">
+      <br>
+      <div id="reasons" style="position:relative; align:left " >
+
+      </div>
+
+    </div>
+</div> -->
+
+
+		
+
+
+
+
+		<script type="text/javascript">
+  // function next_instruction(selector) {
+  //   $(this).hide();
+  //   $(selector).show();
+  // }
+  // $('#basicNext').hide();
+  
+  setTimeout(function() {$('#basicNext').show();},45000);
+  function buttonDelay(x,y){
+    setTimeout(function() {$(y).show();},x);
+  }
+  
+
+
+</script>
+<div id="instruction" style="width:100%" >
+  <section class="py-5 grey lighten-4" id="basic">
+    <div class="container my-auto">
+
+      <!-- <h1><strong>SUBJECTIVE QULAITY ASSESMENT OF VIDEOS</strong></h1> -->
+<!-- <h2>INSTRUCTIONS</h2> -->
+<h2 class="display-4">SUBJECTIVE QULAITY ASSESMENT OF VIDEOS</h2>
+<!-- <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p> -->
+
+<div id="skip_instruction" class="alert alert-warning" role="alert">
+  If you have participated in the study before, you can click <button type="button" onclick="next('quiz')">here</button> to skip the instructions.
+</div>
+
+<div class="alert alert-danger" role="alert">
+  Please read the instructions carefully. You will be evaluated through a quiz after.
+</div>
+
+
+
+<!-- <div class="alert alert-secondary" >
+    <hr class="my-4">
+    <p class="lead">INSTRUCTIONS</p>
+    <hr class="my-4">
+</div> -->
+<!-- <p>It uses utility classes for typography and spacing to space content out within the larger container.</p> -->
+
+<div class="w-responsive mx-auto mb-5">
+<!-- <div class="alert alert-primary" role="alert"> -->
+  <p>
+    In this study, you will rate the quality of a set of videos.
+    <br> Your quality ratings should reflect the quality of the videos, but not what the video is about. In other words, decide how badly the video is distorted, if at all.
+    <br> For example, a well-composed but grainy, blurry or shaky video would likely be of low quality.
+    <br> It is not important if the videographer did a poor job positioning people or objects in the video scene. In other words, the aesthetics are not important but the video quality is.
+    <br> Here are a few example videos along with their quality opinions: <b>Bad</b>, <b>Poor</b>, <b>Fair</b>, <b>Good</b>, and <b>Excellent</b>.
+  </p>
+</div>
+
+<!-- explain bad videos? remove examples? -->
+<font size="4">
+<table border="0" align="center">
+  <tr>
+      <td>
+          <th style = "font-size: large;"><em>BAD</em>
+          </th>
+      </td>
+      <td>
+          <p align="center">
+              <video width="500" muted autoplay loop>
+                  <source src="https://sandboxtestvideos.s3.us-east-2.amazonaws.com/samples1/bad.mp4" type="video/mp4">
+              </video>
+          </p>
+      </td>
+  </tr>
+  <tr>
+      <td>
+          <th style = "font-size: large;"><em>POOR</em>
+          </th>
+      </td>
+      <td>
+          <p align="center">
+              <video width="500" muted autoplay loop>
+                  <source src="https://sandboxtestvideos.s3.us-east-2.amazonaws.com/samples1/poor.mp4" type="video/mp4">
+              </video>
+          </p>
+      </td>
+  </tr>
+  <tr>
+      <td>
+          <th style = "font-size: large;"><em>FAIR</em>
+          </th>
+      </td>
+      <td>
+          <p align="center">
+              <video width="500" muted autoplay loop>
+                  <source src="https://sandboxtestvideos.s3.us-east-2.amazonaws.com/samples1/fair.mp4" type="video/mp4">
+              </video>
+          </p>
+      </td>
+  </tr>
+  <tr>
+      <td>
+          <th style = "font-size: large;"><em>GOOD</em>
+          </th>
+      </td>
+      <td>
+          <p align="center">
+              <video width="500" muted autoplay loop>
+                  <source src="https://sandboxtestvideos.s3.us-east-2.amazonaws.com/samples1/good.mp4" type="video/mp4">
+              </video>
+          </p>
+      </td>
+  </tr>
+  <tr>
+      <td>
+          <th style = "font-size: large;"><em>EXCELLENT</em>
+          </th>
+      </td>
+      <td>
+          <p align="center">
+              <video width="500" muted autoplay loop>
+                  <source src="https://sandboxtestvideos.s3.us-east-2.amazonaws.com/samples1/excellent.mp4" type="video/mp4">
+              </video>
+          </p>
+      </td>
+  </tr>
+</table>
+</font>
+
+You can proceed to the next page when the "Next" button appears.
+      <div align="center" id = "basicNext" style="display:none">
+        <button type="button" class="btn btn-primary btn-xl nextButton" onclick="$('#basic').hide();$('#howto').show();buttonDelay(60000,'#howtoNext')">Next</button>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="py-5 grey lighten-4" id="howto" style="display:none">
+    <div class="container my-auto">
+
+      <!-- <div class="alert alert-secondary" id="rating_instructions" align="center">
+  <img src="https://sandboxtestvideos.s3.us-east-2.amazonaws.com/samples/slider_demo.png" alt="Rating Interface"
+  width="45%" height="30%">
+</div> -->
+<div class="alert alert-secondary" >
+<p class="lead">HOW TO RATE A VIDEO:<p>
+<br />
+<ol>
+    <li>After each video has been played, a rating bar will appear, calibrated on a <b>continuous scale (0-100)</b> from BAD to EXCELLENT. Five pointers - "BAD," "POOR," "FAIR," "GOOD," and "EXCELLENT" are placed at equal intervals on top of the scale to guide you. The interface is as shown in the figure below.</li>
+    <li>Rate the video by using the mouse to move your rating to the score (position) you think best represents the quality of the image. NOTE THAT YOU MAY MOVE THE MARKER <b>ANYWHERE ON THE SLIDER</b>, <b>NOT ONLY</b> AT THE 5 POINTERS (BAD-EXCELLENT). </li>
+    <li>Drag the cursor along the scale and its final position will be considered as your response once you click ‘Submit’. </li>
+    <li>For every video we display, we have intentionally placed the marker at a random initial position. </li>
+    <li>You will not be able to submit your rating and proceed to the next video unless you have moved the cursor. Please do not give random ratings, because we will detect this and boot you from the study. </li>
+    <li><b>Below the submit buttion</b>, you will have the option to <b>report</b> the video in case you feel the content has <em>nudity</em>, <em>violence</em> or any other <em>inappropriate content</em>. Please also report if you encounter a <em>static video</em> or a <em>still scene</em>, or if a video is <em>misoriented</em> (i.e. the video is captured vertically but oriented horizontally or vice versa). You can check the corresponding boxes to do so. This is not mandatory and you can proceed to the next video in case there is nothing to report.
+    </li>
+</ol>
+<img id="slider_demo" src="https://mainstudy.s3.us-east-2.amazonaws.com/slider_demo_mobile_v3.png" alt="Rating Interface" width = "1000" max-height = "95vh" max-width = "95%" class="imgcenter">
+
+<br>
+<br>
+<div>
+      <div align="center" id = "howtoNext" style="display:none">
+        <button type="button" class="btn btn-primary btn-xl nextButton" onclick="$('#howto').hide();$('#phases').show();buttonDelay(20000,'#phasesNext')">Next</button>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="py-5 grey lighten-4" id="phases" style="display:none">
+    <div class="container my-auto">
+
+      <div class="alert alert-secondary" >
+  <p class="lead">TRAINING AND TESTING PHASES:<p>
+    <hr class="my-4">
+  The study has been divided into two phases - a <b>training phase</b> and a <b>testing phase</b>. The first few videos that you will see should help you acquaint yourself with the rating procedure and the range of qualities of the videos. You'll be informed when this training phase is over and then you will move on to the testing phase.
+</div>
+      <div align="center" id = "phasesNext" style="display:none">
+        <button type="button" class="btn btn-primary btn-xl nextButton" onclick="$('#phases').hide();$('#notes').show();buttonDelay(60000,'#notesNext')">Next</button>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="py-5 grey lighten-4" id="notes" style="display:none">
+    <div class="container my-auto">
+
+      <div class="alert alert-secondary" >
+  <p class="lead">ADDITIONAL INSTRUCTIONS:<p>
+    <hr class="my-4">
+</div>
+<ul>
+  <li> Please close any other tabs or windows that are open in your browser while participating in this study. Also, set your browser window to 100% zoom for the entire duration of the study.</li>
+  <li> Please close all other applications that may be running on your device which may affect the browser performance.</li>
+  <li> Please use the latest versions of any of the following browsers - Chrome, Firefox, Edge, Safari or Opera.</li>
+  <li> Please move your chair to a comfortable viewing distance from where you can see the displayed videos.</li>
+  <li> If you normally wear <b>corrective lenses</b> to view a monitor at this distance, <b>please use them during the study</b>, as abnormal vision will affect your perception of the video quality.</li>
+  <li> Please switch off your mobile phone or other devices that might disturb or distract you during the experiment. Please ensure consistent network connectivity and an uninterrupted working environment. The session is continuous and cannot be paused.</li>
+  <li> At the end of the study, you will be asked to fill in some pertinent survey questions which are integral to it. </li>
+</ul>
+      <div align="center" id = "notesNext" style="display:none">
+        <button type="button" class="btn btn-primary btn-xl nextButton" onclick="$('#notes').hide();$('#ethics').show();buttonDelay(60000,'#ethicsNext')">Next</button>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="py-5 grey lighten-4" id="ethics" style="display:none">
+    <div class="container my-auto">
+
+      <h2 class="display-4">Ethics Policy</h2>
+
+<p>
+Thank you again for participating in our Amazon Turk study! One issue we would prefer not to bring up are
+Turk workers who do not take their task seriously, and instead <em>game</em> or <em>cheat</em> by trying to find ways of
+only appearing to do the task, to get paid without really doing the work. While most Amazon Turk
+workers are wonderful participants, the number of Turk workers that try to <em>cheat</em> has increased.
+
+<br>
+<br>
+We therefore must tell you that we have sophisticated ways of finding whether a worker is working
+honestly or not. If a worker does not pass our tests, then their session will end, they will not be paid, and
+they will not be allowed to participate again, or in future studies!
+
+<br>
+<br>
+There are other reasons why we might end your session early, e.g., if we find your set-up cannot
+download or play videos quickly. In those cases, we will not stop you from future studies, but we will ask
+you not to try the current study again.
+
+
+<br>
+<br>
+
+<!--- <h4>IMPORTANT NOTE: You will be allowed to participate in the study once per day. Please do not try to participate more than once/day, since you will not receive credit/payment if you do. Of course, you can again participate on the following days</h4> --->
+<h4> IMPORTANT NOTE: If for some reason the video does not load, please return the HIT and contact us but DO NOT REFRESH the page</h4>
+</p>
+      <div align="center" id = "ethicsNext" style="display:none">
+        <button type="button" class="btn btn-primary btn-xl nextButton" onclick="$('#ethics').hide();next();">Next</button>
+      </div>
+
+    </div>
+  </section>
+</div>
+	  <!-- Quiz questions to check if subjects have read the instructions-->
+<script type="text/javascript">
+(function($){
+
+$.fn.shuffle = function() {
+
+ var allElems = this.get(),
+     getRandom = function(max) {
+         return Math.floor(Math.random() * max);
+     },
+     shuffled = $.map(allElems, function(){
+         var random = getRandom(allElems.length),
+             randEl = $(allElems[random]).clone(true)[0];
+         allElems.splice(random, 1);
+         return randEl;
+    });
+
+ this.each(function(i){
+     $(this).replaceWith($(shuffled[i]));
+ });
+
+ return $(shuffled);
+
+};
+})(jQuery);
+$(document).ready(function(){
+    $( '.Q1 label' ).shuffle();
+    $( '.Q2 label' ).shuffle();
+    $( '.Q3 label' ).shuffle();
+    $( '.Q4 label' ).shuffle();
+    $( '.Q5 label' ).shuffle();
+    $( '.Q6 label' ).shuffle();
+  });
+  function checkQuiz(){
+    var num_corr = 0;
+    var wr_ans = 0;
+    var ans1 = $("input[name='q1']:checked").val();
+    if(ans1=='b'){
+      num_corr+=1;
+    }else{
+      wr_ans = 1;
+    }
+    var ans2 = $("input[name='q2']:checked").val();
+    if(ans2=='a'){
+      num_corr+=1;
+    }else{
+      wr_ans = 2;
+    }
+    var ans3 = $("input[name='q3']:checked").val();
+    if(ans3=='b'){
+      num_corr+=1;
+    }else{
+      wr_ans = 3;
+    }
+    var ans4 = [];
+    $.each($("input[name='q4']:checked"), function(){
+        ans4.push($(this).val());
+    });
+    // ans4_c = 0;
+    // if(ans4.includes('a')){ans4_c+=1};
+    // if(ans4.includes('b')){ans4_c+=1};
+    // if(ans4.includes('d')){ans4_c+=1};
+    // if(ans4_c==3){
+    //   num_corr+=1;
+    // }
+    if(ans4.includes('a') && ans4.includes('b') && ans4.includes('d')){
+      num_corr+=1;
+    }else{
+      wr_ans = 4;
+    }
+    // alert("My choices are: " + ans4.length);
+    var ans5 = $("input[name='q5']:checked").val();
+    if(ans5=='c'){
+      num_corr+=1;
+    }else{
+      wr_ans = 5;
+    }
+    var ans6 = $("input[name='q6']:checked").val();
+    if(ans6=='a'){
+      num_corr+=1;
+    }else{
+      wr_ans = 6;
+    }
+
+    if(!ans1 || !ans2 || !ans3 || !ans4.length || !ans5 || !ans6){
+      alert('Please answer all before submitting!');
+    }
+
+    if(ans1 && ans2 && ans3 && ans4.length && ans5 && ans6){
+      if(num_corr == 5){
+        // alert('You have passed!');
+        if(wr_ans==1){
+          $("input[name='q1'][value='b']").closest('label').css("color", 'green');
+          $("input[name='q1']:checked").closest('label').css("color", 'red');
+        }
+        if(wr_ans==2){
+          $("input[name='q2'][value='a']").closest('label').css("color", 'green');
+          $("input[name='q2']:checked").closest('label').css("color", 'red');
+        }
+        if(wr_ans==3){
+          $("input[name='q3'][value='b']").closest('label').css("color", 'green');
+          $("input[name='q3']:checked").closest('label').css("color", 'red');
+        }
+        if(wr_ans==4){
+          $("input[name='q4'][value='a']").closest('label').css("color", 'green');
+          $("input[name='q4'][value='b']").closest('label').css("color", 'green');
+          $("input[name='q4'][value='d']").closest('label').css("color", 'green');
+          if(ans4.includes('c')){
+            $("input[name='q4'][value='c']").closest('label').css("color", 'red');
+          }
+          if(ans4.includes('e')){
+            $("input[name='q4'][value='e']").closest('label').css("color", 'red');
+          }
+        }
+        if(wr_ans==5){
+          $("input[name='q5'][value='c']").closest('label').css("color", 'green');
+          $("input[name='q5']:checked").closest('label').css("color", 'red');
+        }
+        if(wr_ans==6){
+          $("input[name='q6'][value='a']").closest('label').css("color", 'green');
+          $("input[name='q6']:checked").closest('label').css("color", 'red');
+        }
+
+        $('#quizSubmit').hide();
+        $('#quizNext5').show();
+      }else if (num_corr == 6) {
+        $('#quizSubmit').hide();
+        $('#quizNext6').show();
+      }else{
+        $('input[name=q1]').attr('checked',false);
+        $('input[name=q2]').attr('checked',false);
+        $('input[name=q3]').attr('checked',false);
+        $('input[name=q4]').attr('checked',false);
+        $('input[name=q5]').attr('checked',false);
+        $('input[name=q6]').attr('checked',false);
+        $('#quiz').hide();
+        next('instruction');
+        $('#skip_instruction').html('You have failed the quiz.');
+        $('html,body').scrollTop(0); // jump to top
+      }
+    }
+  }
+</script>
+
+<div id="quiz" style="width:100%" >
+  <section class="py-5 grey lighten-4">
+    <div class="container my-auto">
+
+<div class="alert alert-secondary" >
+<p class="lead">QUIZ TIME!<p>
+<h2>The following quiz is to test your diligence and sincerity. Please choose the appropriate options: </h2>
+<br>
+<p><b>Q1. Where can you find the rating slider?</b></p>
+<div class="Q1">
+<label><input type="radio" name="q1" value="a"> Below a video while it is playing</label><br>
+<label><input type="radio" name="q1" value="b"> On the next page after the video has stopped playing</label><br>
+<label><input type="radio" name="q1" value="c"> Top of the video while it is playing</label><br>
+</div>
+<br>
+<div class="Q2">
+<p><b>Q2. How do you rate a video using the slider?</b></p>
+<label><input type="radio" name="q2" value="a"> Drag the cursor along the rating scale to the appropriate position</label><br>
+<label><input type="radio" name="q2" value="b"> Click on the five reference positions shown above the scale</label><br>
+<label><input type="radio" name="q2" value="c"> Enter the rating value in the box below the scale</label><br>
+</div>
+<br>
+<div class="Q3">
+<p><b>Q3. You are evaluating each video based on its:</b></p>
+<label><input type="radio" name="q3" value="a"> Content (what is in the video)</label><br>
+<label><input type="radio" name="q3" value="b"> Quality (how good the video looks)</label><br>
+<label><input type="radio" name="q3" value="c"> Aesthetics (how good the video scene is framed)</label><br>
+</div>
+<br>
+<div class="Q4">
+<p><b>Q4. What kind of content, if present, do we want you to report? (Select all that apply)</b></p>
+<label><input type="checkbox" name="q4" value="a"> Nudity</label><br>
+<label><input type="checkbox" name="q4" value="b"> Violence</label><br>
+<label><input type="checkbox" name="q4" value="c"> Sports</label><br>
+<label><input type="checkbox" name="q4" value="d"> Still Scenes</label><br>
+<label><input type="checkbox" name="q4" value="e"> Low-light scenes</label><br>
+</div>
+<br>
+<div class="Q5">
+<p><b>Q5. How do you report a video?</b></p>
+<label><input type="radio" name="q5" value="a"> Return the HIT and email us immediately</label><br>
+<label><input type="radio" name="q5" value="b"> Include it in the final comments at the end</label><br>
+<label><input type="radio" name="q5" value="c"> Select the report option and choose accordingly</label><br>
+</div>
+<br>
+<div class="Q6">
+<p><b>Q6. What should you do if you normally wear corrective lens?</b></p>
+<label><input type="radio" name="q6" value="a"> Wear it during the study, as not using it might affect your perception of quality</label><br>
+<label><input type="radio" name="q6" value="b"> Not wear it as that will be an interesting experiment</label><br>
+<label><input type="radio" name="q6" value="c"> Not care as it does not matter for this study</label><br>
+</div>
+<br>
+</div>
+<!-- <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script> -->
+
+<div align="center" id = "quizSubmit" >
+  <button type="button" class="btn btn-primary btn-xl nextButton" onclick="checkQuiz()">Submit</button>
+</div>
+
+<div align="center" id = "quizNext6" style="display:none">
+  <p>You have passed! Click 'Next' to proceed with the study</p>
+  <button type="button" class="btn btn-primary btn-xl nextButton" onclick="next()">Next</button>
+</div>
+
+<div align="center" id = "quizNext5" style="display:none">
+  <p>You have passed but you made one mistake. Check the correct answer(in green) and then click 'Next' to proceed with the study</p>
+  <button type="button" class="btn btn-primary btn-xl nextButton" onclick="next()">Next</button>
+</div>
+
+</div>
+</section>
+</div>
+	  <script type="text/javascript">
+  function validSurvey() {
+  	// https://stackoverflow.com/questions/6920606/jquery-how-to-check-if-all-radio-buttons-in-a-div-are-selected
+  	// $('[name=age]:checked').val() === undefined;
+      if (
+        $('[name=tp]:checked').val() === undefined ||
+        $('[name=qp]:checked').val() === undefined ||
+        $('[name=dev]:checked').val() === undefined ||
+        $('[name=display]:checked').val() === undefined ||
+        $('[name=gender]:checked').val() === undefined ||
+        $('[name=age]:checked').val() === undefined ||
+        $('[name=lens]:checked').val() === undefined ||
+        $('[name=wearlens]:checked').val() === undefined ||
+        $('[name=dist]:checked').val() === undefined
+      ) {
+        $('#surveyButton').prop("disabled", true);
+      } else {
+        $('#surveyButton').prop("disabled", false);
+      }
+      //var empty = $('#survey:not(:has(:radio:checked))')
+  		//$('#surveyButton').prop("disabled", empty.length > 0);
+  }
+  $(document).ready(function(){
+    $('input[type="radio"]').click(validSurvey);
+  });
+</script>
+
+<section class="py-5">
+  <div class="container my-auto">
+    <div id='survey' style="display:none" width="100%" class="survey form-group">
+        <!-- <div id='survey_box' class="box" style="width:60%;"> -->
+
+
+
+<!-- Holds the final questions that we wish to ask in the end-->
+<p style="font-size:30px">Almost Done! </p>
+<h2>Please answer the survey questions below:</h2>
+<br>
+<p>Do you like taking/viewing videos?</p>
+<label><input type="radio" name="tp" value="Yes"> Yes</label><br>
+<label><input type="radio" name="tp" value="No"> No</label><br>
+<label><input type="radio" name="tp" value="dontcare"> Sometimes. Not a lot though!</label><br>
+<br>
+<p>Does the quality of videos on the social media ever bother you?</p>
+<label><input type="radio" name="qp" value="Yes"> Yes</label><br>
+<label><input type="radio" name="qp" value="No"> No</label><br>
+<label><input type="radio" name="qp" value="dontcare"> I don't really care!</label><br>
+<label><input type="radio" name="qp" value="dontknow"> Aren't all videos of same quality?</label><br>
+<br>
+<p>What device do you use for capturing videos most often?</p>
+<label><input type="radio" name="dev" value="Mobile devices"> Mobile devices ( Iphone/Android devices) </label><br>
+<label><input type="radio" name="dev" value="DSLR"> A high-end DSLR camera </label><br>
+<label><input type="radio" name="dev" value="DigiCam"> A decent Digital Camera</label><br>
+<br>
+<p>Which display device (monitor) are you using to view the videos and perform this task?</p>
+<label><input type="radio" name="display" value="Phone"> Phone Screen </label><br>
+<label><input type="radio" name="display" value="Tablet"> Tablet Screen </label><br>
+<label><input type="radio" name="display" value="Desktop"> Desktop Monitor </label><br>
+<label><input type="radio" name="display" value="Laptop"> Laptop Screen </label><br>
+<label><input type="radio" name="display" value="HDTV"> HDTV screen</label><br>
+<br>
+<p>Your Gender</p>
+<label><input type="radio" name="gender" value="Male"> Male</label><br>
+<label><input type="radio" name="gender" value="Female"> Female</label><br>
+<label><input type="radio" name="gender" value="Other"> Other</label><br>
+<label><input type="radio" name="gender" value="NA"> Prefer not to disclose</label><br>
+<br>
+<p>Your Age</p>
+<label><input type="radio" name="age" value="<20"> less than 20</label><br>
+<label><input type="radio" name="age" value="20-30"> 20-30</label><br>
+<label><input type="radio" name="age" value="30-40"> 30-40</label><br>
+<label><input type="radio" name="age" value=">40"> Above 40</label><br>
+<label><input type="radio" name="age" value="NA"> Prefer not to disclose</label><br>
+<br>
+<p>Do you wear corrective lenses?</p>
+<label><input type="radio" name="lens" value="Yes"> Yes</label><br>
+<label><input type="radio" name="lens" value="No"> No</label><br>
+<br>
+<p>If the answer to the above question is yes, are you wearing your corrective lenses now?</p>
+<label><input type="radio" name="wearlens" value="Yes"> Yes</label><br>
+<label><input type="radio" name="wearlens" value="No"> No</label><br>
+<label><input type="radio" name="wearlens" value="NA"> NA</label><br>
+<br>
+<p>Approximately how far are you sitting away from your screen?</p>
+<label><input type="radio" name="dist" value="<15">  less than 15 inches away</label><br>
+<label><input type="radio" name="dist" value="15-30"> Between 15-30 inches</label><br>
+<label><input type="radio" name="dist" value=">30"> Greater than 30 inches away</label><br>
+<br>
+<p>Do you have any additional comments for us?</p>
+<div align='center'>
+  <textarea name="comments" rows="5" cols="30"></textarea>
+</div>
+<br>
+
+<div id="bottomInfo" align=center>
+  <button class="btn-xl btn btn-primary nextButton"  id="surveyButton" disabled type="button" onclick="next();$(this).hide();" title="Please fill out the survey. Thank you!">
+  <span style='font-size:16pt'>Done!</span>
+  </button>
+</div>
+
+
+
+<!-- </div> -->
+</div>
+</div>
+</section>
+		<!-- invisible image div may block the button click!!! -->
+
+		<!-- phase -->
+		<div id = "divNextButton" width="100%" class="slidecontainer" align=center>
+			 <!-- disabled=true -->
+			 	 <div class="center">
+					 <div id="phase_info"></div>
+					 <button type="button" id="nextButton" class="btn btn-primary btn-xl nextButton" onclick="next()">
+						 <span style='font-size:16pt'>Click to Continue</span>
+					 </button>
+					 <div id = "not_assigned" align=left style = "display:none">
+						 <p>Please accept the HIT to begin!</p>
+					 </div>
+				 </div>
+		 </div>
+
+		 <section class="py-5 grey lighten-5">
+			 <div class="container my-auto">
+				 <div id='divRejected' class="survey form-group">
+		 			<div class="box"> <h1> Sorry!</h1>
+You are not able to proceed because:
+<p id='reasonRejected'></p>
+ </div>
+		 		</div>
+			 </div>
+		 </section>
+
+
+
+		<!-- <div class="container" id="wait">
+		  <h2>Spinners</h2>
+		  <p>To create a spinner/loader, use the <code>.spinner-border</code> class:</p>
+			<span class="d-none spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+		</div> -->
+
+		<!-- <div id="bottomDiv" width="100%" class="slidecontainer" align=center onclick="next();$(this).hide();">
+			<div id="bottomInfo"></div>
+			<br>
+			<button id="bottomButton" type="button">
+				<span style='font-size:16pt'>Start</span>
+			</button>
+		</div> -->
+
+
+		<!-- disabled=true  -->
+		<!-- <div id="submitSurveyButton" style="position:relative; top: 10px; width:275px; height:75px" title="Fill survey before submitting!">
+				<button id="sub_butB" type="button" onclick="" style="position:relative; width:100%; height:100%; font-size:16pt; font-weight:bold">
+						SUBMIT
+				</button>
+		</div> -->
+
+    <!-- hidden input to record the results  -->
+		<input type="hidden" name="screenSize" id="screenSize" value="unset">
+		<input type="hidden" name="systemInfo" id="systemInfo" value="unset">
+		<input type="hidden" name="browserWindowSize" id="browserWindowSize" value="unset">
+		<input type="hidden" name="debugInfo" id="debugInfo" value="unset">
+
+		
+    <input type="hidden" name="videos1" id="videos1" value="unset">
+		
+    <input type="hidden" name="videos2" id="videos2" value="unset">
+		
+    <input type="hidden" name="videos3" id="videos3" value="unset">
+		
+    <input type="hidden" name="videos4" id="videos4" value="unset">
+		
+    <input type="hidden" name="videos5" id="videos5" value="unset">
+		
+    <input type="hidden" name="videos6" id="videos6" value="unset">
+		
+    <input type="hidden" name="videos7" id="videos7" value="unset">
+		
+    <input type="hidden" name="videos8" id="videos8" value="unset">
+		
+    <input type="hidden" name="videos9" id="videos9" value="unset">
+		
+    <input type="hidden" name="videos10" id="videos10" value="unset">
+		
+    <input type="hidden" name="videos11" id="videos11" value="unset">
+		
+    <input type="hidden" name="videos12" id="videos12" value="unset">
+		
+    <input type="hidden" name="videos13" id="videos13" value="unset">
+		
+    <input type="hidden" name="videos14" id="videos14" value="unset">
+		
+    <input type="hidden" name="videos15" id="videos15" value="unset">
+		
+    <input type="hidden" name="videos16" id="videos16" value="unset">
+		
+    <input type="hidden" name="videos17" id="videos17" value="unset">
+		
+    <input type="hidden" name="videos18" id="videos18" value="unset">
+		
+    <input type="hidden" name="videos19" id="videos19" value="unset">
+		
+    <input type="hidden" name="videos20" id="videos20" value="unset">
+		
+    <input type="hidden" name="videos21" id="videos21" value="unset">
+		
+    <input type="hidden" name="videos22" id="videos22" value="unset">
+		
+    <input type="hidden" name="videos23" id="videos23" value="unset">
+		
+    <input type="hidden" name="videos24" id="videos24" value="unset">
+		
+    <input type="hidden" name="videos25" id="videos25" value="unset">
+		
+    <input type="hidden" name="videos26" id="videos26" value="unset">
+		
+    <input type="hidden" name="videos27" id="videos27" value="unset">
+		
+    <input type="hidden" name="videos28" id="videos28" value="unset">
+		
+    <input type="hidden" name="videos29" id="videos29" value="unset">
+		
+    <input type="hidden" name="videos30" id="videos30" value="unset">
+		
+    <input type="hidden" name="videos31" id="videos31" value="unset">
+		
+    <input type="hidden" name="videos32" id="videos32" value="unset">
+		
+    <input type="hidden" name="videos33" id="videos33" value="unset">
+		
+    <input type="hidden" name="videos34" id="videos34" value="unset">
+		
+    <input type="hidden" name="videos35" id="videos35" value="unset">
+		
+    <input type="hidden" name="videos36" id="videos36" value="unset">
+		
+    <input type="hidden" name="videos37" id="videos37" value="unset">
+		
+    <input type="hidden" name="videos38" id="videos38" value="unset">
+		
+    <input type="hidden" name="videos39" id="videos39" value="unset">
+		
+    <input type="hidden" name="videos40" id="videos40" value="unset">
+		
+    <input type="hidden" name="videos41" id="videos41" value="unset">
+		
+    <input type="hidden" name="videos42" id="videos42" value="unset">
+		
+    <input type="hidden" name="videos43" id="videos43" value="unset">
+		
+    <input type="hidden" name="videos44" id="videos44" value="unset">
+		
+    <input type="hidden" name="videos45" id="videos45" value="unset">
+		
+    <input type="hidden" name="videos46" id="videos46" value="unset">
+		
+    <input type="hidden" name="videos47" id="videos47" value="unset">
+		
+    <input type="hidden" name="videos48" id="videos48" value="unset">
+		
+    <input type="hidden" name="videos49" id="videos49" value="unset">
+		
+    <input type="hidden" name="videos50" id="videos50" value="unset">
+		
+    <input type="hidden" name="videos51" id="videos51" value="unset">
+		
+    <input type="hidden" name="videos52" id="videos52" value="unset">
+		
+    <input type="hidden" name="videos53" id="videos53" value="unset">
+		
+    <input type="hidden" name="videos54" id="videos54" value="unset">
+		
+    <input type="hidden" name="videos55" id="videos55" value="unset">
+		
+    <input type="hidden" name="videos56" id="videos56" value="unset">
+		
+    <input type="hidden" name="videos57" id="videos57" value="unset">
+		
+    <input type="hidden" name="videos58" id="videos58" value="unset">
+		
+    <input type="hidden" name="videos59" id="videos59" value="unset">
+		
+    <input type="hidden" name="videos60" id="videos60" value="unset">
+		
+    <input type="hidden" name="videos61" id="videos61" value="unset">
+		
+    <input type="hidden" name="videos62" id="videos62" value="unset">
+		
+    <input type="hidden" name="videos63" id="videos63" value="unset">
+		
+    <input type="hidden" name="videos64" id="videos64" value="unset">
+		
+    <input type="hidden" name="videos65" id="videos65" value="unset">
+		
+    <input type="hidden" name="videos66" id="videos66" value="unset">
+		
+    <input type="hidden" name="videos67" id="videos67" value="unset">
+		
+    <input type="hidden" name="videos68" id="videos68" value="unset">
+		
+    <input type="hidden" name="videos69" id="videos69" value="unset">
+		
+    <input type="hidden" name="videos70" id="videos70" value="unset">
+		
+    <input type="hidden" name="videos71" id="videos71" value="unset">
+		
+    <input type="hidden" name="videos72" id="videos72" value="unset">
+		
+    <input type="hidden" name="videos73" id="videos73" value="unset">
+		
+    <input type="hidden" name="videos74" id="videos74" value="unset">
+		
+    <input type="hidden" name="videos75" id="videos75" value="unset">
+		
+    <input type="hidden" name="videos76" id="videos76" value="unset">
+		
+    <input type="hidden" name="videos77" id="videos77" value="unset">
+		
+    <input type="hidden" name="videos78" id="videos78" value="unset">
+		
+    <input type="hidden" name="videos79" id="videos79" value="unset">
+		
+    <input type="hidden" name="videos80" id="videos80" value="unset">
+		
+    <input type="hidden" name="videos81" id="videos81" value="unset">
+		
+    <input type="hidden" name="videos82" id="videos82" value="unset">
+		
+		
+    <input type="hidden" name="GoldenK/A" value="unset">
+		
+    <input type="hidden" name="GoldenK/B" value="unset">
+		
+    <input type="hidden" name="GoldenK/C" value="unset">
+		
+    <input type="hidden" name="GoldenK/D" value="unset">
+		
+  </body>
+</html>
