@@ -1,0 +1,1567 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<style>
+			.stop {
+			 animation-name: none !important;
+			 -webkit-animation-name: none !important;
+			}
+			/* * { border: 1px solid yellow; }
+			https://eggplantstudios.ca/2012/fixing-a-blank-white-space-at-the-bottom-of-your-website/
+			 */
+			#old_bottom_left_addons {
+			  position: absolute;
+			  bottom: 0px;
+			   margin-right: auto;
+			   margin-left: auto;
+			   left: 0px;
+			   font-size:12pt;
+			}
+			#traintest video {
+		   display: block;
+			}
+			video
+			{
+			    /* max-height: 95vh;
+			    max-width: 95%; */
+			    max-height: 100vh;
+			    max-width: 100%;
+			}
+			/* https://stackoverflow.com/questions/19461521/how-to-center-an-element-horizontally-and-vertically */
+			.center {
+			  position: absolute;
+			  top: 50%;
+			  left: 50%;
+			  width: 100vw;
+			  -moz-transform: translateX(-50%) translateY(-50%);
+			  -webkit-transform: translateX(-50%) translateY(-50%);
+			  transform: translateX(-50%) translateY(-50%);
+			}
+			.slidecontainer {
+  width: 100%;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 25px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #007bff;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #007bff;
+  cursor: pointer;
+}
+		</style>
+		
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+	  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+		
+		<!-- <link rel="stylesheet" href="css/font-awesome.min.css"> -->
+		<script type="text/javascript">
+		// the script in the html pages might need to call function in utils.zjs
+			 // test cases: golden video broken
+// prepare vid names: testVids and trainVids
+// const video lists
+const GOLDEN = [];
+const TRAINS = ['colmd-Virtual_13th_Mayor_and_City_Council_Meeting_-_July_27_2020', 'tbcama-Brockton_Public_Library_Final_Suffrage_Event_12-3-20', 'tctvma-Templeton_Elementary_School_Building_Committee_Zoom_Meeting_of_June_4_2020'];
+const LABELS = ['wtvma-Wareham_Sewer_Commissioners_Meeting_5-21-2020', 'bctvct-Board_of_Selectmen_Special_Zoom_Meeting_-_07_22_2020', 'wtvma-Wareham_Board_of_Selectmen_Meeting_12-8-2020', 'brattvvt-Townshend_Selectboard_-_Townshend_SB_Mtg_4_14_20', 'patma-City_Council_Meeting_-_May_28_2020', 'cctv17vt-10_28_2020_-_Burlington_City_Council_Special_Meeting', 'ehmma-Easthampton_City_Council_Appointment_Committee_5_20_2020', 'soatvma-Somerset_Planning_Board_-_December_22_2020', 'copaca-City_Council_Special_Meeting_-_June_2_2020', 'soatvma-Somerset_Planning_Board_-_October_27_2020', 'mgatct-October_2020_Board_of_Aldermen_Meeting', 'chtvma-Conservation_Commission_-_January_5_2021', 'Livonia_City_Council_Study_Meeting_-_May_27_2020', 'pactvma-NDCAP_Meeting_-_7_20_20_-_Nuclear_Decommissioning_Citizens_Advisory_Panel_Plymouth', 'tbcama-United_Way_of_Greater_Plymouth_County_98th_Annual_Meeting', 'ehmma-Easthampton_City_Council_Public_Safety_Committee_8_17_2020', 'nwct18mn-CCX_Create_All_Member_Reopening_Meeting_2020', 'tctvma-NRSD_School_Committee_meeting_of_Jan._11_2021', 'bitvil-Municipal_Services_Committee_4_23_20', 'cctv17vt-6_26_2020_-_2_00pm_-_Mayor_Weinberger_Burlington_COVID-19_Response_Team_Update', 'cstlmo-Education_and_Youth_Matters_Committee_Meeting_May_28_2020', 'cosjca-JUN_17_2020_Rules_and_Open_Government_Committee_of_the_Whole', 'cdaid-Coeur_Housing_Community_Meeting_11-19-20', 'ectpa-Scranton_Virtual_City_Council_May_12_2020', 'soatvma-Somerset_Board_of_Selectmen_-_April_22_2020', 'cowmi-Westland_Planning_Meeting_July_7_2020', 'ehmma-Easthampton_City_Council_Rules_Government_Relations_Committee_10_1_2020', 'cc4ia-MPOJC_20201118', 'Whitman_Finance_Committee_Meeting._March_31_2020', 'wcatwma-Conservation_Commission_-_April_23_2020', 'mctvca-Millbrae_ARC_Anti-Racist_Coalition_September_Upcoming_Events', 'wcatwma-Wakefield_Human_Rights_Commission_-_July_21st_2020', 'soatvma-Somerset_Community_Preservation_Committee_-_December_3_2020', 'Livonia_City_Council_Regular_Meeting_-_April_15_2020', 'Longmeadow_Select_Board_Meeting_061520', '20201223-wed-700pm-zoom', 'chtvma-Roberts_Field_Advisory_Committee_-_September_3_2020', 'wrokmi-Royal_Oak_City_Commission_meeting_of_4_13_20', 'Albany_City_Council_-_Oct._29_2020', 'wcatwma-Wakefield_Disabilities_Commission_-_May_4_2020', 'tctvma-NRSD_School_Committee_Meeting_of_Dec._14', 'soatvma-Somerset_Planning_Board_-_November_10_2020', 'conlia-Zoom_Meeting_Stress_Test', 'bctvct-Board_of_Selectmen_-_Special_-_4_22_2020', 'catvma-Community_Update-_Ashley_Destino_Gloucester_Biotechnology_Academy-_April_28_2020', 'cosjca-AUG_27_2020_Ad_Hoc_Committee_on_Housing_Construction_Development_Services', 'pctvny-2020-03-26_WEB_Board_of_Education_Meeting', 'gmtvct-Groton_Public_Library_Zoom_Basics_Part_3_-_Navigating_a_Meeting_Etiquette', 'wcatwma-Wakefield_s_Weekly_COVID_Update_-_December_4_2020', '20201220-sun-700pm-zoom-meeting', 'pegtvvt-Proctor_Select_Board_-_December_28_2020', 'ehmma-Easthampton_City_Council_Ordinance_Committee_7_30_2020', 'wtvma-Wareham_Board_of_Selectmen_Meeting_11-5-2020', 'publici_cast_tameside_512552', 'fcatma-Sunderland_Selectboard_via_Zoom_-_June_22_2020', 'fcatma-Sunderland_Selectboard_via_Zoom_-_April_21_2020', 'ehmma-Easthampton_City_Council_Appointment_Committee_8_19_2020', 'actonma-Acton-Boxborough_United_Way_Annual_Meeting_2020', 'ectpa-Lackawanna_County_Board_of_Commissioners_Meeting_Oct_21_2020', 'pegtvvt-Rutland_Town_Select_Board_-_August_18_2020', 'stvma-Selectmen_9_8_20', 'coftn-Envision_Franklin_Amendment_Neighborhood_Meeting_5-14-2020', 'tolsc-Town_Council_Meeting_April_20_2020.', 'Arts_Committee_Special_Meeting_-_June_29_2020', 'cosjca-DEC_8_2020_City_Council_Morning_Session', 'codhmi-Dearborn_Heights_Study_Session_-_1_12_21', 'mg_0254-Zoom_Virtual_Meeting', 'cosjca-OCT_14_2020_Rules_Open_Government_Committee_of_the_Whole', 'City_Council_Virtual_Special_Meeting_-_Aug._5_2020', 'fcatma-Conway_Selectboard_via_Zoom_-_Deecember_7_2020', 'cosjca-AUG_20_2020_Public_Safety_Finance_Strategic_Support_Committee', 'soatvma-Somerset_Planning_Board_-_August_11_2020', 'stvma-Nashoba_Regional_School_Committee_April_8_2020', 'chtvma-Select_Board_-_December_14_2020', 'cosjca-JUN_10_2020_Rules_and_Open_Government_Committee_of_the_Whole', 'cosjca-AUG_12_2020_Planning_Commission', 'patma-Peabody_School_Committee_-_June_16_2020', 'fcatma-Deerfield_Community_Preservation_Committee_-_March_19_2020', 'ngtvma-Nantucket_Select_Board_-_Please_Read_Description_-_6_29_20', 'ctvmi-Marine_City_Commission_Meeting_Thurs_Nov._19_2020', 'wtvma-Wareham_Conservation_Commission_Meeting_7-15-2020', 'patma-April_2_2020_-_Planning_Board_Meeting', 'tbcama-Shelter_from_the_Storm_-_Housing_Resources_during_COVID-19', 'ngtvma-Nantucket_Zoning_Board_of_Appeals_-_12_10_20', 'gbatvmd-Democratic_Club_on_Zoom_with_State_Senator_Jim_Rosapepe', 'cg_0130-October_13_2020_BOS_Economic_Advisory_Commission_Meeting_-_Zoom_Recording', 'ehmma-Easthampton_City_Council_Public_Safety_Committee_5_13_2020', 'mhtvmav-Marblehead_School_Committee_Meeting_12.03.20', 'coame-City_Of_Auburn_Maine_Planning_Board_Meeting_For_October_13th_2020', 'ehmma-Easthampton_Board_Of_Public_Works_11_4_2020', 'cc4ia-MPOJC_20200527', 'ngtvma-Nantucket_Select_Board_Board_of_Health_Joint_Meeting_-', 'wtvma-Wareham_Finance_Committee_Meeting_6-4-2020', 'fcatma-Sunderland_Selectboard_via_Zoom_-_November_30_2020', '20210103-sun-700pm-zoom-meeting', 'fcatma-Sunderland_Selectboard_via_Zoom_-_May_26_2020'];
+const BACKUP = []; // don'trainVids shuffle BACKUP videos, if there is one borken video, we will always have backup1 rated instead.
+function get_repeat_vids(vids) {
+	var arr = [];
+	var repeat = [];
+	while(arr.length < 0){
+		var r = Math.floor(Math.random() * vids.length );
+		if(arr.indexOf(r) === -1){
+			repeat.push(vids[r]);
+			arr.push(r);
+		}
+	} // https://stackoverflow.com/a/2380113
+	return repeat;
+}
+const REPEAT = get_repeat_vids(LABELS);
+const MIN_REPEAT_DISTANCE = 0;
+
+// random sample (k) videos from a video list (vids)
+// return [] if k <= 0
+
+const PHASES = ['intro', 'instruction', 'pre_train', 'annotation', 'pre_test', 'annotation', 'done'];
+var thisPhase;
+var nextPhase = PHASES[0];
+var debug_mode = false; // false initally, will be updated later
+var currentVid = null;
+var phaseIndex = 0;
+
+function next() {
+	// show html only this phase
+	thisPhase = nextPhase;
+
+	$('div[id^=phase]').hide();
+	$('div[id=phase\\:' +thisPhase+ ']').show();
+
+	console.log('[' + thisPhase + ']');
+
+	
+
+	
+
+	// call function according to current phase:
+	// instruction --> call instruction()
+	// quiz --> call quiz()
+	document.body.style.backgroundColor = "white";
+
+	// call this phase and get next phase
+	// nextPhase = ( window[thisPhase]() == 'repeat')? thisPhase : PHASES [PHASES.indexOf(thisPhase) + 1];
+	if (window[thisPhase]() != 'repeat')
+	{
+		phaseIndex += 1;
+		nextPhase =  PHASES [phaseIndex];
+	}
+	// nextPhase = ( window[thisPhase]() == 'repeat')? thisPhase : PHASES [phase_idx + 1]; # duplicated phases
+}
+
+var trainVids = {idx:0, names:[], elements: []};
+var testVids = {idx:0, names:[], elements: []}; // including repeated, golden, and label videos
+var thisVids = testVids;
+
+trainVids.names.push(...TRAINS);
+testVids.names.push(...LABELS);
+testVids.names.push(...REPEAT);
+testVids.names.push(...GOLDEN);
+
+
+
+if(MIN_REPEAT_DISTANCE > 1) {
+	// it will change the arr dyncamically...
+	REPEAT.forEach( function(v, idx) {
+		// find occurances:
+		var first = testVids.names.indexOf(v);
+		var second = testVids.names.indexOf(v, first+1);
+
+		if (second - first < MIN_REPEAT_DISTANCE) {
+			// console.log('-------Distance change: ' + idx + ':' + first + '-' +  second)
+			var i = second
+			var j = ( first + MIN_REPEAT_DISTANCE ) % testVids.names.length;
+			[testVids.names[i], testVids.names[j]] = [testVids.names[j], testVids.names[i]];
+		}
+	} );
+}
+
+
+// turk.js
+// is_assigned
+// for rejections
+// int|
+var train_delay = 0;
+
+
+
+$(document).ready(function(){
+	// load_vid(vids, vids.idx + num_videos_cache_at_beginning - 1);
+	// don't cache video at beginning
+	next();
+});
+		</script>
+  </head>
+  <body>
+		<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <!-- <a class="navbar-brand" href="#">Navbar</a> -->
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+			
+			<li class="nav-item">
+				<script>
+  function saveResult() {
+    
+      $('#consoleLog').val(logMessages.join('\n'));
+    
+
+  	var s = "";
+    $('input[name^=record]').each(function(index){
+      s += this.id + ',' + '"' + this.value + '"' + '\n';
+    });
+
+    $('input[id^=videos]').each(function(index){
+      console.log(this.id + ':' + LABELS[index] + ' = ' + this.value)
+      s += LABELS[index] + ',' + '"' + this.value + '"' + '\n';
+    });
+    // no survey pages
+    // $('#survey input').each(function(index){
+    //   s += this.name + ',' + '"' + this.value + '"' + '\n';
+    // });
+
+
+  	csv = 'data:text/csv;charset=utf-8,' + s;
+  	data = encodeURI(csv);
+    link = document.createElement('a');
+    link.setAttribute('href', data);
+    link.setAttribute('download', 'results.csv'); // g5+s4
+    link.click();
+
+  }
+</script>
+
+<button class="btn btn-primary btn-xl nextButton" type="button" onclick = 'saveResult()'>
+  <!-- <i class="fa fa-download" aria-hidden="true"></i> -->
+  Results
+</button>
+			</li>
+			
+			<li class="nav-item">
+				<script>
+// overwrite console.log so that it includes timestamp and also write to both a string and the console
+// https://stackoverflow.com/questions/24052775/how-to-get-the-console-log-content-as-string-in-javascript
+var logBackup = console.log; // console.log with timestamp
+var logMessages = [];
+
+console.log = function() {
+  var timestamp = new Date().toJSON(); // The easiest way I found to get milliseconds in the timestamp
+  var args = arguments;
+
+  logBackup.apply(console, arguments); // console don't show timestamp
+  args[0] = timestamp + ' > ' + arguments[0];
+  logMessages.push.apply(logMessages, args);
+};
+
+function copyDebugInfo() {
+  var copyText = document.getElementById("helpMsg");
+  copyText.select();
+  copyText.setSelectionRange(0, 99999)
+  document.execCommand("copy");
+  // alert("Copied the text: " + copyText.value);
+  document.getElementById("helpBtn").textContent  = 'Information Copied!';
+}
+</script>
+
+<input type="hidden" name="record.log" id="consoleLog" value="unset">
+<a class="nav-link" onclick="javascript:if(currentVid){currentVid.pause();}" onmouseover="$('textarea#helpMsg').val(logMessages.join('\n'));" data-toggle="modal" data-target="#modalHelp" id="btnHlep">
+  Help
+</a>
+
+
+<!-- Modal -->
+<div class="modal fade" id="modalHelp" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Need some help?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body"  style="font-size:medium;">
+        We are sorry if you encounter any problem.
+
+        
+            <br>
+            1. click the "Results" button on the top left corner to export your current progress.
+            <br>
+            2. email <a href="mailto:zqying@utexas.edu">zqying@utexas.edu</a> with the exported file attached, describe what you observed.
+        
+
+        Thank you!
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary btn-xl" data-dismiss="modal" onclick="javascript:if(currentVid){currentVid.play();}">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+ <!-- color: rgb(234, 18, 18);background-color: #EEE; -->
+			</li>
+			
+			<li class="nav-item">
+				<a class="nav-link" data-toggle="modal" data-target="#modalHowto" onclick="javascript:if(currentVid){currentVid.pause();}" id="btnHlep">
+  Instructions
+</a>
+
+<!-- <div class="alert alert-secondary" id="rating_instructions" align="center">
+  <img src="https://sandboxtestvideos.s3.us-east-2.amazonaws.com/samples/slider_demo.png" alt="Rating Interface"
+  width="45%" height="30%">
+</div> -->
+  <!-- Modal -->
+  <div class="modal fade" id="modalHowto" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">HOW TO RATE A VIDEO:</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body"  style="font-size:medium;">
+          <br />
+          <ol>
+              <li>After each video has been played, a rating bar will appear, calibrated on a <b>continuous scale (0-100)</b> from BAD to EXCELLENT. Five pointers - "BAD," "POOR," "FAIR," "GOOD," and "EXCELLENT" are placed at equal intervals on top of the scale to guide you. The interface is as shown in the figure below.</li>
+              <li>Rate the video by using the mouse to move your rating to the score (position) you think best represents the quality of the video. NOTE THAT YOU MAY MOVE THE MARKER <b>ANYWHERE ON THE SLIDER</b>, <b>NOT ONLY</b> AT THE 5 POINTERS (BAD-EXCELLENT). </li>
+              <li>Drag the cursor along the scale and its final position will be considered as your response once you click <b>Submit</b>. </li>
+              <li>For every video we display, we have intentionally placed the marker at a random initial position. </li>
+              <li>You will not be able to submit your rating and proceed to the next video unless you have moved the cursor. Please do not give random ratings, because we will detect this and boot you from the study. </li>
+              <!-- <li>Please take this study seriously and do not give random ratings, we will detect this. </li> -->
+          </ol>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary btn-xl" data-dismiss="modal" onclick="javascript:if(currentVid){currentVid.play();}" >OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+			</li>
+			
+    </ul>
+    <form class="form-inline my-2 my-lg-0">
+      <!-- <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"> -->
+      <!-- <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button> -->
+		</form>
+
+  </div>
+</nav>
+		<div id='addons'>
+			
+	    	<script type="text/javascript">
+  $(document).ready(function() {
+    document.addEventListener('start_watching', function(e) {
+      document.body.style.backgroundColor = "black";
+    }, false);
+    document.addEventListener('done_watching', function(e) {
+      document.body.style.backgroundColor = "white";
+    }, false);
+  });
+</script>
+			
+	    	<script type="text/javascript">
+  var last_progress = 0;
+
+  $(document).ready(function(){
+    document.addEventListener('done_watching', function (e) {
+      // show progress every 10% done
+    	// showing the number of videos will scare people away
+    	// showing the precentage for every video introduce stress
+      // (index+1) + " out of " + (vids.items.length)
+      // instead of showing the exact number, it's better to show a percentage
+      let index = thisVids.idx;
+    	if (index <= 1) {last_progress = 0;} // reset
+    	let progress = (index)/(thisVids.names.length)*100;
+    	if (progress - last_progress > 10) {
+    		$('#submit_info').html(parseInt(progress) + '% Done');
+    		last_progress = progress;
+    	} else {
+    		$('#submit_info').html('');
+    	}
+    }, false);
+  });
+</script>
+			
+	    	<!-- session_info: storing session information including the names of testing videos after shuffling -->
+<!-- <input type="hidden" name="record" id="browserWindowSize" value="unset"> -->
+<!-- <input type="hidden" name="record" id="nanDelay" value="unset"> -->
+<input type="hidden" name="record" id="testVidList" value="unset">
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('#testVidList').val(testVids.names.join('\n'));
+  });
+</script>
+			
+	    	<script type="text/javascript">
+  var t00;
+  $(document).ready(function() {
+    document.addEventListener('start_watching', function(e) {
+      t00 = performance.now();
+    }, false);
+    document.addEventListener('done_watching', function(e) {
+      if (currentVid != null) {
+        // is it possible currentVid changed? No
+        var t0 = currentVid.timeStart;
+        if (t0 != undefined) {
+          t00 = t0;
+        } // wait until time runs out
+        var t1 = performance.now();
+        // let duration = isNan(currentVid.duration)?
+        delay = ((t1 - t00) / 1000) - currentVid.duration; // now the duration is ready
+        // the same video? what if it get replaced?
+        // repeated video
+        // sessionStorage['delay'] = isNaN(delay)? 'start=' + t00 + ';end=' + t1 + ';duration=' + currentVid.duration : delay;
+        sessionStorage['delay'] = delay.toFixed(2);
+
+        if (isNaN(delay)) { // only for nan videos
+          let selected = $('#nanDelay');
+          let info = currentVid.src + ' :start=' + t00.toFixed(2) + '&end=' + t1.toFixed(2) + '&duration=' + currentVid.duration;
+          if (selected.val() == "unset") {
+            selected.val(info);
+          } else { // append the value
+            selected.val(selected.val() + ' | ' + info);
+          }
+        }
+        console.log("Time taken: " + (t1 - t0) / 1000);
+        console.log("Train Delay: " + train_delay);
+        console.log("Delay: " + delay);
+
+        
+        // redo the video if speedup
+        if ( delay < -0.5) {
+          
+          reject('Please disable your speedup plugin and try again.');
+          
+        }
+        
+      }
+    }, false);
+  });
+</script>
+			
+	    	 <!-- sytem_info.html --------------------------------------------------------->
+<input type="hidden" name="record.sys" id="osName" value="unset">
+<input type="hidden" name="record.sys" id="browser" value="unset">
+<input type="hidden" name="record.sys" id="mobile" value="unset">
+<input type="hidden" name="record.sys" id="screenSize" value="unset">
+
+<script>
+  (function (window) {
+      {
+      /* test cases
+          alert(
+              'browserInfo result: OS: ' + browserInfo.os +' '+ browserInfo.osVersion + '\n'+
+                  'Browser: ' + browserInfo.browser +' '+ browserInfo.browserVersion + '\n' +
+                  'Mobile: ' + browserInfo.mobile + '\n' +
+                  'Cookies: ' + browserInfo.cookies + '\n' +
+                  'Screen Size: ' + browserInfo.screen
+          );
+      */
+          var unknown = 'Unknown';
+
+          // screen
+          var screenSize = '';
+          if (screen.width) {
+              width = (screen.width) ? screen.width : '';
+              height = (screen.height) ? screen.height : '';
+              screenSize += '' + width + " x " + height;
+          }
+
+          //browser
+          var nVer = navigator.appVersion;
+          var nAgt = navigator.userAgent;
+          var browser = navigator.appName;
+          var version = '' + parseFloat(navigator.appVersion);
+          var majorVersion = parseInt(navigator.appVersion, 10);
+          var nameOffset, verOffset, ix;
+
+          // Opera
+          if ((verOffset = nAgt.indexOf('Opera')) != -1) {
+              browser = 'Opera';
+              version = nAgt.substring(verOffset + 6);
+              if ((verOffset = nAgt.indexOf('Version')) != -1) {
+                  version = nAgt.substring(verOffset + 8);
+              }
+          }
+          // MSIE
+          else if ((verOffset = nAgt.indexOf('MSIE')) != -1) {
+              browser = 'Microsoft Internet Explorer';
+              version = nAgt.substring(verOffset + 5);
+          }
+
+          //IE 11 no longer identifies itself as MS IE, so trap it
+          //http://stackoverflow.com/questions/17907445/how-to-detect-ie11
+          else if ((browser == 'Netscape') && (nAgt.indexOf('Trident/') != -1)) {
+
+              browser = 'Microsoft Internet Explorer';
+              version = nAgt.substring(verOffset + 5);
+              if ((verOffset = nAgt.indexOf('rv:')) != -1) {
+                  version = nAgt.substring(verOffset + 3);
+              }
+
+          }
+
+          // Chrome
+          else if ((verOffset = nAgt.indexOf('Chrome')) != -1) {
+              browser = 'Chrome';
+              version = nAgt.substring(verOffset + 7);
+          }
+          // Safari
+          else if ((verOffset = nAgt.indexOf('Safari')) != -1) {
+              browser = 'Safari';
+              version = nAgt.substring(verOffset + 7);
+              if ((verOffset = nAgt.indexOf('Version')) != -1) {
+                  version = nAgt.substring(verOffset + 8);
+              }
+
+              // Chrome on iPad identifies itself as Safari. Actual results do not match what Google claims
+              //  at: https://developers.google.com/chrome/mobile/docs/user-agent?hl=ja
+              //  No mention of chrome in the user agent string. However it does mention CriOS, which presumably
+              //  can be keyed on to detect it.
+              if (nAgt.indexOf('CriOS') != -1) {
+                  //Chrome on iPad spoofing Safari...correct it.
+                  browser = 'Chrome';
+                  //Don't believe there is a way to grab the accurate version number, so leaving that for now.
+              }
+          }
+          // Firefox
+          else if ((verOffset = nAgt.indexOf('Firefox')) != -1) {
+              browser = 'Firefox';
+              version = nAgt.substring(verOffset + 8);
+          }
+          // Other browsers
+          else if ((nameOffset = nAgt.lastIndexOf(' ') + 1) < (verOffset = nAgt.lastIndexOf('/'))) {
+              browser = nAgt.substring(nameOffset, verOffset);
+              version = nAgt.substring(verOffset + 1);
+              if (browser.toLowerCase() == browser.toUpperCase()) {
+                  browser = navigator.appName;
+              }
+          }
+          // trim the version string
+          if ((ix = version.indexOf(';')) != -1) version = version.substring(0, ix);
+          if ((ix = version.indexOf(' ')) != -1) version = version.substring(0, ix);
+          if ((ix = version.indexOf(')')) != -1) version = version.substring(0, ix);
+
+          majorVersion = parseInt('' + version, 10);
+          if (isNaN(majorVersion)) {
+              version = '' + parseFloat(navigator.appVersion);
+              majorVersion = parseInt(navigator.appVersion, 10);
+          }
+
+          // mobile version
+          var mobile = /Mobile|mini|Fennec|Android|iP(ad|od|hone)/.test(nVer);
+
+          // cookie
+          var cookieEnabled = (navigator.cookieEnabled) ? true : false;
+
+          if (typeof navigator.cookieEnabled == 'undefined' && !cookieEnabled) {
+              document.cookie = 'testcookie';
+              cookieEnabled = (document.cookie.indexOf('testcookie') != -1) ? true : false;
+          }
+
+          // system
+          var os = unknown;
+          var clientStrings = [
+              {s:'Windows 3.11', r:/Win16/},
+              {s:'Windows 95', r:/(Windows 95|Win95|Windows_95)/},
+              {s:'Windows ME', r:/(Win 9x 4.90|Windows ME)/},
+              {s:'Windows 98', r:/(Windows 98|Win98)/},
+              {s:'Windows CE', r:/Windows CE/},
+              {s:'Windows 2000', r:/(Windows NT 5.0|Windows 2000)/},
+              {s:'Windows XP', r:/(Windows NT 5.1|Windows XP)/},
+              {s:'Windows Server 2003', r:/Windows NT 5.2/},
+              {s:'Windows Vista', r:/Windows NT 6.0/},
+              {s:'Windows 7', r:/(Windows 7|Windows NT 6.1)/},
+              {s:'Windows 8.1', r:/(Windows 8.1|Windows NT 6.3)/},
+              {s:'Windows 8', r:/(Windows 8|Windows NT 6.2)/},
+              {s:'Windows NT 4.0', r:/(Windows NT 4.0|WinNT4.0|WinNT|Windows NT)/},
+              {s:'Windows ME', r:/Windows ME/},
+              {s:'Android', r:/Android/},
+              {s:'Open BSD', r:/OpenBSD/},
+              {s:'Sun OS', r:/SunOS/},
+              {s:'Linux', r:/(Linux|X11)/},
+              {s:'iOS', r:/(iPhone|iPad|iPod)/},
+              {s:'Mac OS X', r:/Mac OS X/},
+              {s:'Mac OS', r:/(MacPPC|MacIntel|Mac_PowerPC|Macintosh)/},
+              {s:'QNX', r:/QNX/},
+              {s:'UNIX', r:/UNIX/},
+              {s:'BeOS', r:/BeOS/},
+              {s:'OS/2', r:/OS\/2/},
+              {s:'Search Bot', r:/(nuhk|Googlebot|Yammybot|Openbot|Slurp|MSNBot|Ask Jeeves\/Teoma|ia_archiver)/}
+          ];
+          for (var id in clientStrings) {
+              var cs = clientStrings[id];
+              if (cs.r.test(nAgt)) {
+                  os = cs.s;
+                  break;
+              }
+          }
+
+          var osVersion = unknown;
+
+          if (/Windows/.test(os)) {
+              osVersion = /Windows (.*)/.exec(os)[1];
+              os = 'Windows';
+          }
+
+          switch (os) {
+              case 'Mac OS X':
+                  osVersion = /Mac OS X (10[\.\_\d]+)/.exec(nAgt)[1];
+                  break;
+
+              case 'Android':
+                  osVersion = /Android ([\.\_\d]+)/.exec(nAgt)[1];
+                  break;
+
+              case 'iOS':
+                  osVersion = /OS (\d+)_(\d+)_?(\d+)?/.exec(nVer);
+                  osVersion = osVersion[1] + '.' + osVersion[2] + '.' + (osVersion[3] | 0);
+                  break;
+
+          }
+      }
+
+      window.browserInfo = {
+          screen: screenSize,
+          browser: browser,
+          browserVersion: version,
+          mobile: mobile,
+          os: os,
+          osVersion: osVersion,
+          cookies: cookieEnabled
+      };
+  }(this));
+
+  // https://stackoverflow.com/questions/9514179/how-to-find-the-operating-system-version-using-javascript
+  $(document).ready(function(){
+    $("#osName").val(browserInfo.os +' '+ browserInfo.osVersion);
+    $("#browser").val(browserInfo.browser +' '+ browserInfo.browserVersion);
+    $("#mobile").val(browserInfo.mobile);
+    // $("#cookies").val(browserInfo.cookies);
+    $("#screenSize").val(browserInfo.screen);
+    $("#fullscreenSize").val(getResolution());
+  });
+</script>
+			
+	    	<div class="modal fade" id="modal_resolution" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Incorrect Resolution Setting</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Please set the display resolution to 1920x1080! Otherwise you'll receive no marks for this homework.
+      </div>
+      <div class="modal-footer">
+        <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
+</div>
+<input type="hidden" name="record" id="fullscreenSize" value="unset">
+<script type="text/javascript">
+  // https://www.tutorialrepublic.com/faq/how-to-detect-screen-resolution-with-javascript.php
+  function getResolution() {
+      return window.screen.width * window.devicePixelRatio + "x" + window.screen.height * window.devicePixelRatio;
+  }
+  
+</script>
+			
+	    	<script type="text/javascript">
+  // "Please DO NOT REFRESH OR CLOSE THE WEBPAGE WHILE DOING THE STUDY. "
+  // Firefox displays the string: "This page is asking you to confirm that you want to leave - data you have entered may not be saved." Chrome displays the string: "Do you want to leave this site? Changes you made may not be saved."
+  // Credit: https://stackoverflow.com/questions/10311341/confirmation-before-closing-of-tab-browser
+  window.onbeforeunload = function (e) {
+    // Blocked alert during beforeunload
+    // alert('sa')
+    // e.preventDefault(); not working
+    if ( (thisPhase != PHASES[PHASES.length - 1] ) && (thisPhase != PHASES[0]) ) {
+      // $('#modalLeaving').modal('show'); not working, will show up after clicking CANCEL
+      let msg = 'The data will be lost if the session is terminated in the middle. If there is any problem, please click HELP on the top left corner.';
+
+      e = e || window.event;
+
+      // For IE and Firefox prior to version 4
+      if (e) {
+          e.returnValue = msg;
+      }
+
+      // For Safari
+      // return 'Sure?';
+      return msg;
+    }
+  };
+</script>
+			
+		</div>
+
+		
+      <script>
+  function cache_videos() {
+    for (let i = 0; i < 2; i++) {
+      load_vid(testVids, i);
+      load_vid(trainVids, i);
+    }
+  }
+  function intro() {
+
+  }
+</script>
+<!-- <h1><strong>SUBJECTIVE QULAITY ASSESMENT OF VIDEOS</strong></h1> -->
+<!-- <h2>INSTRUCTIONS</h2> -->
+<div id="phase:intro" style="width:100%">
+  <section class="py-5 grey lighten-4" id="basic">
+    <div class="container my-auto">
+
+      
+      <h2 class="display-4">Telepresence Video Quality Assessment</h2><span id='debug_shortcut'></span>
+      
+      <!-- <p class="lead">This is a simple hero unit, a simple jumbotron-style component for calling extra attention to featured content or information.</p> -->
+
+      <!-- <div id="skip_instruction" class="alert alert-warning" role="alert"> -->
+        <!-- This study is for the class E E 371Q, DIGITAL IMAGE PROCESSING at The University of Texas at Austin. -->
+        <!-- If you are not a student of the class, please do not continue. -->
+
+        <!-- <br> The current session is for <b> Student Group 5 </b>, <b> Session 4</b>. Please double check the group list and make sure you are entering the right session. -->
+        <!-- set the system resolution to 1920X1080,  -->
+        <!-- <br> Before starting, please set system scale to 100% and browser zoom to 100% (Ctrl+0 or Cmd+0) -->
+        <!-- as in the training session -->
+      <!-- </div> -->
+
+      
+
+      <!-- don't delete it, it shows the zoom information  -->
+      <div id='alert-msg'>
+      </div>
+
+      <!-- <div class="alert alert-secondary" >
+    <hr class="my-4">
+    <p class="lead">INSTRUCTIONS</p>
+    <hr class="my-4">
+</div> -->
+      <!-- <p>It uses utility classes for typography and spacing to space content out within the larger container.</p> -->
+
+      <div class="w-responsive mx-auto mb-5">
+        <!-- <div class="alert alert-primary" role="alert"> -->
+        <p>
+          <!-- 🎉 Hello labmates, Thank you for your participation! -->
+          <!-- <br>Instead of submitting Homework 3, you have an alternative option to receive 100% on this assignment: participate in this easy subjective gaming video quality assessment study! -->
+          <!-- <br>Please read the instructions that we sent to you through Canvas carefully before starting this test. -->
+          <br> <br>
+          In this study, you will watch and rate the <b>quality</b> of a set of telepresence videos one after the other.
+          Your quality ratings should reflect the <b>quality</b> of the videos (including audios), but not what the video is about.
+          In other words, decide how badly the video is distorted, if at all.
+          <br>For example, a well-composed but grainy, blurry, shaky or video with background noises would likely be of low quality.
+          <!-- It is not important if the videographer did a poor or good job playing the games, or whether you played or saw the game before. -->
+          <!-- In other words, the gameplay is not important, but the video quality is. -->
+          <br> <br>
+          Here are a few example videos. Think about how you might rate their visual quality on a scale: Bad, Poor, Fair, Good, and Excellent.
+        </p>
+      </div>
+
+      <!-- explain bad videos? remove examples? -->
+
+      
+<font size="4">
+  <table border="0" align="center" id='demo-table'>
+    <tr>
+      <td>
+        <span style="font-size: large;"><em> </em>
+        </span>
+      </td>
+      <td>
+        <p align="center">
+          <video width="500" controls>
+            <source src="https://live-fb.github.io/VQA/year3_examples/20201230-wed-700pm-zoom-meeting.mp4" type="video/mp4">
+            please don't proceed if you can't see this video
+          </video>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span style="font-size: large;"><em> </em>
+        </span>
+      </td>
+      <td>
+        <p align="center">
+          <video width="500" controls>
+            <source src="https://live-fb.github.io/VQA/year3_examples/fcatma-Conway_Selectboard_via_Zoom_-_Deecember_7_2020.mp4" type="video/mp4">
+            please don't proceed if you can't see this video
+          </video>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span style="font-size: large;"><em> </em>
+        </span>
+      </td>
+      <td>
+        <p align="center">
+          <video width="500" controls>
+            <source src="https://live-fb.github.io/VQA/year3_examples/cc4ia-MPOJC_20201118.mp4" type="video/mp4">
+            please don't proceed if you can't see this video
+          </video>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span style="font-size: large;"><em> </em>
+        </span>
+      </td>
+      <td>
+        <p align="center">
+          <video width="500" controls>
+            <source src="https://live-fb.github.io/VQA/year3_examples/tolsc-Town_Council_Meeting_April_20_2020..mp4" type="video/mp4">
+            please don't proceed if you can't see this video
+          </video>
+        </p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span style="font-size: large;"><em> </em>
+        </span>
+      </td>
+      <td>
+        <p align="center">
+          <video width="500" controls>
+            <source src="https://live-fb.github.io/VQA/year3_examples/Whitman_Finance_Committee_Meeting._March_31_2020.mp4" type="video/mp4">
+            please don't proceed if you can't see this video
+          </video>
+        </p>
+      </td>
+    </tr>
+  </table>
+</font>
+
+
+
+
+      <!-- <div class="alert alert-warning" role="alert">
+        You can proceed to the next page when the "Next" button appears.
+      </div> -->
+
+      <div align="center" id="basicNext">
+        <button type="button" class="btn btn-primary btn-xl nextButton" onclick="next();cache_videos()">
+          Get Started!
+        </button>
+      </div>
+    </div>
+  </section>
+</div>
+		
+      <script type="text/javascript">
+  function instruction() {
+  }
+  
+  $(document).ready(function(){
+    $('#basicNext').show();
+  });
+  function buttonDelay(x,y){
+    $(y).show();
+  }
+  
+
+  function isAllChecked() {
+    if($('.notes:checked').length == $('.notes').length) {
+      next();
+    } else {
+      alert('Please check all items by clicking the boxes.');
+    }
+  }
+
+</script>
+<div id="phase:instruction" style="width:100%">
+
+  <section class="py-5 grey lighten-4" id="basic">
+    <div class="container my-auto">
+      <p class="lead">Checklist:
+      <p>
+        <!-- https://mdbootstrap.com/snippets/jquery/mdbootstrap/821010 -->
+      <ul class="list-group list-group-flush">
+
+        
+
+        <li class="list-group-item">
+          <!-- Default checked -->
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="notes custom-control-input" id="check1">
+            <label class="custom-control-label" for="check1">
+              Please use the latest versions of Chrome.
+            </label>
+          </div>
+        </li>
+
+        
+
+        <li class="list-group-item">
+          <!-- Default checked -->
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="notes custom-control-input" id="check2">
+            <label class="custom-control-label" for="check2">
+              Please disable browser zooming (Ctrl+0 or Cmd+0) for the entire duration of the study.
+            </label>
+          </div>
+        </li>
+
+        
+
+        <li class="list-group-item">
+          <!-- Default checked -->
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="notes custom-control-input" id="check3">
+            <label class="custom-control-label" for="check3">
+              Please close all other applications that may be running on your device which may affect the browser performance.
+            </label>
+          </div>
+        </li>
+
+        
+
+        <li class="list-group-item">
+          <!-- Default checked -->
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="notes custom-control-input" id="check4">
+            <label class="custom-control-label" for="check4">
+              Please <b>turn on the sound</b> when playing the videos.
+            </label>
+          </div>
+        </li>
+
+        
+
+        <li class="list-group-item">
+          <!-- Default checked -->
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="notes custom-control-input" id="check5">
+            <label class="custom-control-label" for="check5">
+              Please close any other tabs or windows that are open in your browser while participating in this study.
+            </label>
+          </div>
+        </li>
+
+        
+
+        <li class="list-group-item">
+          <!-- Default checked -->
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="notes custom-control-input" id="check6">
+            <label class="custom-control-label" for="check6">
+              Please set the browser to full-screen mode (F11)
+            </label>
+          </div>
+        </li>
+
+        
+
+        <li class="list-group-item">
+          <!-- Default checked -->
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="notes custom-control-input" id="check7">
+            <label class="custom-control-label" for="check7">
+              Please move your chair to a comfortable viewing distance from where you can see the displayed videos and keep the position during the test.
+            </label>
+          </div>
+        </li>
+
+        
+
+        <li class="list-group-item">
+          <!-- Default checked -->
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="notes custom-control-input" id="check8">
+            <label class="custom-control-label" for="check8">
+              If you normally wear <b>corrective lenses</b> to view a monitor at this distance, <b>please use them during the study</b>, as abnormal vision will affect your perception of the video quality.
+            </label>
+          </div>
+        </li>
+
+        
+
+        <li class="list-group-item">
+          <!-- Default checked -->
+          <div class="custom-control custom-checkbox">
+            <input type="checkbox" class="notes custom-control-input" id="check9">
+            <label class="custom-control-label" for="check9">
+              Please switch off your mobile phone or other devices that might disturb or distract you during the experiment. Please ensure consistent network connectivity and an uninterrupted working environment. The session is continuous and cannot be paused.
+            </label>
+          </div>
+        </li>
+
+        
+
+      </ul>
+
+      <br>
+      <hr>
+      <br>
+
+      <div align=center>
+        <button class="btn-xl btn btn-primary nextButton" type="button" onclick="isAllChecked()"
+        title="Please check all items. Thank you!">
+        Next
+        </button>
+      </div>
+
+    </div>
+  </section>
+</div>
+		
+      <script>
+  function pre_train() {
+    thisVids = trainVids;
+  	
+    // jQuery.noConflict(); 
+    $('#modalHowto').modal('show');
+  	// setTimeout(function() {$('#divNextButton').show();},2000);
+  }
+</script>
+
+<div id="phase:pre_train" width="100%" class="slidecontainer" align=center>
+  <!-- disabled=true -->
+  <div class="center">
+    You are entering the training session.
+    <hr>
+    <button type="button" id="nextButton" class="btn btn-primary btn-xl nextButton" onclick="next()">
+      <span style='font-size:16pt'>Click to Continue</span>
+    </button>
+    <div id="not_assigned" align=left style="display:none">
+      <p>Please accept the HIT to begin!</p>
+    </div>
+  </div>
+</div>
+		
+      
+
+  <script>
+    function annotation() {
+      show_vid(thisVids);
+      thisVids.idx++;
+      if (thisVids.idx != thisVids.names.length) {
+        load_vid(thisVids, thisVids.idx);
+        return 'repeat'
+      }
+    }
+
+    function show_slider(vids) {
+      // video done playing
+      var init_val = Math.floor(Math.random() * 100);
+      sessionStorage['initialVal'] = init_val;
+      $('#attributes').find('input[type=checkbox]:checked').removeAttr('checked');
+      document.getElementById('points').value = init_val;
+
+      // document.getElementById("textbox_input").value = "";
+      $('#textbox').hide();
+      $('#short_instructions').show();
+      $('#buttonA').hide();
+      $('#main-slider').show();
+      $('#points').change(function() {
+        $('#buttonA').show();
+        // $('#report_video').show();
+        $('#sub_butA').prop('disabled', false);
+      });
+    }
+    // load vid elements based on vid names
+    // return false: failed
+    function load_vid(vids, index, update = false) {
+      // update: update already loaded vid elements
+      if (index >= vids.names.length) {
+        return false;
+      }
+      if (vids.elements[index] == 'broken') {
+        return false;
+      }
+      name = vids.names[index];
+      let is_already_loaded = vids.elements[index] != undefined // repeat video
+      if (is_already_loaded && (update == false)) {
+        return true;
+      }
+
+      v = update ? vids.elements[index] : document.createElement('video');
+      v.src = name.includes('http') ? name : 'https://mainstudy.s3.us-east-2.amazonaws.com/year3/' + name + '.mp4'; // don't support google drive now
+      v.identifier = name;
+      v.preload = 'auto'; // https://www.geeksforgeeks.org/html-video-preload-attribute/
+      v.controls = false;
+      v.muted = false;
+      // load_start = performance.now();
+      // if (vids == t) {v.addEventListener("canplaythrough", trainLoadTime);}
+      vids.elements[index] = v; // name --> video
+      // 
+      // 
+      if (REPEAT.indexOf(name) != -1) {
+        // also set the repeated one but only if it canplay, (it might be broken and replaced)
+        // this could be a borken one, old name?
+        let idx = vids.names.lastIndexOf(name); // name changed?
+        if (index != idx) {
+          v.addEventListener('canplay', function() {
+            // don't clone or use the element, keep it seperate
+            vids.names[idx] = vids.names[index]; // might be changed to backup videos
+            load_vid(vids, idx);
+          });
+        }
+      }
+      document.dispatchEvent(new CustomEvent("video_loaded", {
+        "detail": {"vid":v}
+      }));
+      return true;
+    }
+
+    // combine train and test function
+    function show_vid(vids, index = null) {
+      if (index == null) {
+        index = vids.idx;
+      }
+      if (index >= vids.names.length || index < 0) {
+        return false;
+      }
+      load_vid(vids, index);
+      $('#traintest').show(); // video and slider
+      $('#main-slider').hide();
+      $("#divVideo").empty();
+
+      currentVid = vids.elements[index];
+      console.log('show_vid' + index + ':' + currentVid.src)
+      document.body.style.backgroundColor = "";
+      document.getElementById("divVideo").appendChild(currentVid);
+      currentVid.play();
+      document.dispatchEvent(new Event('start_watching'));
+      console.log(currentVid.duration); // sometime it's NaN. if the metadata is not ready, then it's nan
+
+      // if error, load it gain
+      currentVid.addEventListener('ended', function() {
+        //currentVid.remove();
+        // remove all videos on the screen, avoid some error
+        show_slider(vids);
+        $("#divVideo").empty(); // just clear it again
+        document.dispatchEvent(new Event('done_watching'));
+        // currentVid = null;
+      });
+      return true;
+    }
+
+    function submitAnswer() {
+      // update user interface ----------------------------
+      // $('#main-slider').animate({top: '-2000px'});
+      $('#buttonA').hide();
+
+      // recording information -----------------------------
+      var final_val = document.getElementById("points").value
+      var init_val = sessionStorage['initialVal'] || 'defaultValue';
+      var delay = sessionStorage['delay'] || 'defaultValue'; // sessionStorage['delay'] is null
+
+
+      // on submit action
+      var attributes = [];
+      // $('#attributes').find('input[type=checkbox]:checked').each((index, item) => {
+      //   attributes.push(item.value);
+      // });
+      // attributes.push(document.getElementById("textbox_input").value)
+
+
+      // select the correct index
+      if (testVids.idx > 0) { // set if phase == test -- will lose the last rating!!!
+        var name = testVids.names[testVids.idx - 1]
+        var r = [...LABELS, ...BACKUP].indexOf(name) // videos1 to vides 82 and then backup videos
+
+        // golden video or broken video (backup loaded, we have 80 backup videos)
+        if (r == -1) {
+          selected = $("input[name='" + name + "']");
+        } else {
+          selected = $("#videos" + (r + 1));
+        } // double-checked, r start with 0 while videos start with 1
+        // selected = $("#selection"+(p.idx)) // be carefull +1 -1
+
+        if (selected.val() == "unset") {
+          selected.val(init_val + "/" + final_val + "/" + attributes + "/" + delay);
+        } else { // append the value
+          selected.val(selected.val() + ' | ' + init_val + "/" + final_val + "/" + attributes + "/" + delay);
+        }
+
+        console.log(selected.attr('name') + ' ' + name + ' ---> ' + selected.val());
+        $("#status-test" + testVids.idx).css("background-color", "green");
+        $('#sub_butA').attr("disabled", true);
+
+        // rejection ----------------------------------
+        $('#sub_butA').trigger('rejection_check');
+      } else {
+        $("#status-train" + trainVids.idx).css("background-color", "green");
+      }
+
+      next();
+    }
+  </script>
+
+  <div class="slidecontainer" id='phase:annotation' width="100%" align="center">
+    <!-- style="position:relative; width:100%" align="center" -->
+    <div class="center" width="100%" id='divVideo'>
+    </div>
+    <div id='main-slider' class="center">
+      <div class='box'>
+        <div id="feedback" align=center style="display:none"></div>
+        <div id="trial_num" style="display:none"></div>
+        <div id="short_info" align="center" style="width: 80%; margin: 0 auto; text-align: left; display:none" align=c enter></div>
+        <div id="slider_info" align=center>
+          Please drag the slider to indicate the quality you saw.
+          <br>Focus on the <b>quality</b> instead of the content.
+          <br>(The initial position of the slider is placed at random.)
+        </div>
+        <div id="short_instructions" style="display:none;"></div>
+        <br />
+
+        <div class="steps" style="display: flex; justify-content: space-between; width:80%; position:relative; font-size:small;" align="center">
+  <span style="display:inline-block;width:19%;text-align:center;">
+    BAD
+  </span>
+  <span style="display:inline-block;width:19%;text-align:center;">
+    POOR
+  </span>
+  <span style="display:inline-block;width:19%;text-align:center;">
+    FAIR
+  </span>
+  <span style="display:inline-block;width:19%;text-align:center;">
+    GOOD
+  </span>
+  <span style="display:inline-block;width:19%;text-align:center;">
+    EXCELLENT
+  </span>
+</div>
+<!-- style="position:relative; height:30px; width:80%;"  -->
+<input type="range" class="slider" style="width:80%" align="center"  name="points" id="points" value="50" min="0" max="100" data-show-value="false" align="center">
+<!-- <div class="steps" style="position:relative; font-size:small;" align="center">
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+      <span style="display:inline-block;width:3.25%;text-align:center;"> | </span>
+    </div> -->
+<br />
+<div class="steps" style="display: flex; justify-content: space-between; position:relative; font-size:small; width:87%" align="center">
+  <span style="display:inline-block;width:8%;text-align:center;"> 0 </span>
+  <span style="display:inline-block;width:8%;text-align:center;"> 10 </span>
+  <span style="display:inline-block;width:8%;text-align:center;"> 20 </span>
+  <span style="display:inline-block;width:8%;text-align:center;"> 30 </span>
+  <span style="display:inline-block;width:8%;text-align:center;"> 40 </span>
+  <span style="display:inline-block;width:8%;text-align:center;"> 50 </span>
+  <span style="display:inline-block;width:8%;text-align:center;"> 60 </span>
+  <span style="display:inline-block;width:8%;text-align:center;"> 70 </span>
+  <span style="display:inline-block;width:8%;text-align:center;"> 80 </span>
+  <span style="display:inline-block;width:8%;text-align:center;"> 90 </span>
+  <span style="display:inline-block;width:8%;text-align:center;"> 100 </span>
+</div>
+
+        <br>
+        <br>
+        <br>
+      </div>
+
+      <div id="buttonA" style="position:relative;" title="You must move the slider before submitting!" data-toggle="popover" data-placement="bottom" data-content="You must move the slider before submitting!">
+        <div id="submit_info" style="font-size:medium;"></div>
+        <button class="btn btn-primary btn-xl nextButton" id="sub_butA" type="button" onclick="submitAnswer()" style="position:relative;">
+          Submit
+        </button>
+        <br />
+        <br />
+        
+      </div>
+
+    </div>
+  </div>
+
+  
+		
+      <script>
+  function pre_test() {
+    thisVids = testVids;
+  	
+  	// setTimeout(function() {$('#divNextButton').show();},2000);
+  }
+</script>
+
+<div id="phase:pre_test" width="100%" class="slidecontainer" align=center>
+  <!-- disabled=true -->
+  <div class="center">
+    You are entering the testing session.
+    <hr>
+    <button type="button" id="nextButton" class="btn btn-primary btn-xl nextButton" onclick="next()">
+      <span style='font-size:16pt'>Click to Continue</span>
+    </button>
+  </div>
+</div>
+		
+      <script type="text/javascript">
+  function done() {
+    document.dispatchEvent(new Event('session_end'));
+  	// configuration and thanks
+    currentVid = null;
+  
+  	$('#done').show();
+  	// $('#survey_box').animate({right: '-100%'});
+  	$('#survey').hide();
+  	$('#divNextButton').hide();
+  	$("#submitButton").show();
+    $("#submitButton").prop('disabled', false);
+  	$("#submitButton").css("visibility", "visible");
+  	$('<input/>').attr({type:'hidden',name:'welldone',value:'yes'}).appendTo('#survey');
+  	// closeFullscreen();
+    
+      saveResult();
+    
+  }
+</script>
+
+<div id='phase:done' style="display:none" width="100%" class="center">
+  <section class="py-5">
+    <div class="container my-auto">
+
+      <h1>Thank you so much for your participation!</h1>
+      <br>
+      Your results should have been downloaded. If not, Please click button <b>"Results"</b> in the left top corner to save the data.
+      Please email the result file to <a href="mailto:zqying@utexas.edu">zqying@utexas.edu</a>.
+      You can close this page after saving the result.
+      <br>
+      <!-- Please rename the output csv file with your name and EID (Format: "Your group no." + "Your current session no." + "Your EID"+ "First Name"+ "LastName".csv, Please keep the "+"sign.), and submit through Canvas before end of Thursday, Nov. 12th. -->
+      <br>
+
+    </div>
+  </section>
+</div>
+		
+		<div id='phase:reject' class="center">
+  <section class="py-5">
+    <div class="container my-auto">
+      <h1> Sorry!</h1>
+      You are not able to proceed because:
+      <p id='reasonRejected'></p>
+    </div>
+  </section>
+</div>
+<script type="text/javascript">
+  function reject(msg="You may have violated one of our Ethics policies.", retry=true) {
+    $('div[id^=phase]').hide();
+  	$('#phase\\:reject').show();
+  	// console.log('user [' + $.getUrlVar('assignmentId') + '] rejected because of ' + msg);
+  	$('#reasonRejected').html(msg);
+   	// $('#submitButton').remove();
+   	// record information?
+   	// $('#divNextButton').hide();
+  	// phase = 'reject'
+  }
+</script>
+
+		
+    <input type="hidden" name="videos1" id="videos1" value="unset">
+		
+    <input type="hidden" name="videos2" id="videos2" value="unset">
+		
+    <input type="hidden" name="videos3" id="videos3" value="unset">
+		
+    <input type="hidden" name="videos4" id="videos4" value="unset">
+		
+    <input type="hidden" name="videos5" id="videos5" value="unset">
+		
+    <input type="hidden" name="videos6" id="videos6" value="unset">
+		
+    <input type="hidden" name="videos7" id="videos7" value="unset">
+		
+    <input type="hidden" name="videos8" id="videos8" value="unset">
+		
+    <input type="hidden" name="videos9" id="videos9" value="unset">
+		
+    <input type="hidden" name="videos10" id="videos10" value="unset">
+		
+    <input type="hidden" name="videos11" id="videos11" value="unset">
+		
+    <input type="hidden" name="videos12" id="videos12" value="unset">
+		
+    <input type="hidden" name="videos13" id="videos13" value="unset">
+		
+    <input type="hidden" name="videos14" id="videos14" value="unset">
+		
+    <input type="hidden" name="videos15" id="videos15" value="unset">
+		
+    <input type="hidden" name="videos16" id="videos16" value="unset">
+		
+    <input type="hidden" name="videos17" id="videos17" value="unset">
+		
+    <input type="hidden" name="videos18" id="videos18" value="unset">
+		
+    <input type="hidden" name="videos19" id="videos19" value="unset">
+		
+    <input type="hidden" name="videos20" id="videos20" value="unset">
+		
+    <input type="hidden" name="videos21" id="videos21" value="unset">
+		
+    <input type="hidden" name="videos22" id="videos22" value="unset">
+		
+    <input type="hidden" name="videos23" id="videos23" value="unset">
+		
+    <input type="hidden" name="videos24" id="videos24" value="unset">
+		
+    <input type="hidden" name="videos25" id="videos25" value="unset">
+		
+    <input type="hidden" name="videos26" id="videos26" value="unset">
+		
+    <input type="hidden" name="videos27" id="videos27" value="unset">
+		
+    <input type="hidden" name="videos28" id="videos28" value="unset">
+		
+    <input type="hidden" name="videos29" id="videos29" value="unset">
+		
+    <input type="hidden" name="videos30" id="videos30" value="unset">
+		
+    <input type="hidden" name="videos31" id="videos31" value="unset">
+		
+    <input type="hidden" name="videos32" id="videos32" value="unset">
+		
+    <input type="hidden" name="videos33" id="videos33" value="unset">
+		
+    <input type="hidden" name="videos34" id="videos34" value="unset">
+		
+    <input type="hidden" name="videos35" id="videos35" value="unset">
+		
+    <input type="hidden" name="videos36" id="videos36" value="unset">
+		
+    <input type="hidden" name="videos37" id="videos37" value="unset">
+		
+    <input type="hidden" name="videos38" id="videos38" value="unset">
+		
+    <input type="hidden" name="videos39" id="videos39" value="unset">
+		
+    <input type="hidden" name="videos40" id="videos40" value="unset">
+		
+    <input type="hidden" name="videos41" id="videos41" value="unset">
+		
+    <input type="hidden" name="videos42" id="videos42" value="unset">
+		
+    <input type="hidden" name="videos43" id="videos43" value="unset">
+		
+    <input type="hidden" name="videos44" id="videos44" value="unset">
+		
+    <input type="hidden" name="videos45" id="videos45" value="unset">
+		
+    <input type="hidden" name="videos46" id="videos46" value="unset">
+		
+    <input type="hidden" name="videos47" id="videos47" value="unset">
+		
+    <input type="hidden" name="videos48" id="videos48" value="unset">
+		
+    <input type="hidden" name="videos49" id="videos49" value="unset">
+		
+    <input type="hidden" name="videos50" id="videos50" value="unset">
+		
+    <input type="hidden" name="videos51" id="videos51" value="unset">
+		
+    <input type="hidden" name="videos52" id="videos52" value="unset">
+		
+    <input type="hidden" name="videos53" id="videos53" value="unset">
+		
+    <input type="hidden" name="videos54" id="videos54" value="unset">
+		
+    <input type="hidden" name="videos55" id="videos55" value="unset">
+		
+    <input type="hidden" name="videos56" id="videos56" value="unset">
+		
+    <input type="hidden" name="videos57" id="videos57" value="unset">
+		
+    <input type="hidden" name="videos58" id="videos58" value="unset">
+		
+    <input type="hidden" name="videos59" id="videos59" value="unset">
+		
+    <input type="hidden" name="videos60" id="videos60" value="unset">
+		
+    <input type="hidden" name="videos61" id="videos61" value="unset">
+		
+    <input type="hidden" name="videos62" id="videos62" value="unset">
+		
+    <input type="hidden" name="videos63" id="videos63" value="unset">
+		
+    <input type="hidden" name="videos64" id="videos64" value="unset">
+		
+    <input type="hidden" name="videos65" id="videos65" value="unset">
+		
+    <input type="hidden" name="videos66" id="videos66" value="unset">
+		
+    <input type="hidden" name="videos67" id="videos67" value="unset">
+		
+    <input type="hidden" name="videos68" id="videos68" value="unset">
+		
+    <input type="hidden" name="videos69" id="videos69" value="unset">
+		
+    <input type="hidden" name="videos70" id="videos70" value="unset">
+		
+    <input type="hidden" name="videos71" id="videos71" value="unset">
+		
+    <input type="hidden" name="videos72" id="videos72" value="unset">
+		
+    <input type="hidden" name="videos73" id="videos73" value="unset">
+		
+    <input type="hidden" name="videos74" id="videos74" value="unset">
+		
+    <input type="hidden" name="videos75" id="videos75" value="unset">
+		
+    <input type="hidden" name="videos76" id="videos76" value="unset">
+		
+    <input type="hidden" name="videos77" id="videos77" value="unset">
+		
+    <input type="hidden" name="videos78" id="videos78" value="unset">
+		
+    <input type="hidden" name="videos79" id="videos79" value="unset">
+		
+    <input type="hidden" name="videos80" id="videos80" value="unset">
+		
+    <input type="hidden" name="videos81" id="videos81" value="unset">
+		
+    <input type="hidden" name="videos82" id="videos82" value="unset">
+		
+    <input type="hidden" name="videos83" id="videos83" value="unset">
+		
+    <input type="hidden" name="videos84" id="videos84" value="unset">
+		
+    <input type="hidden" name="videos85" id="videos85" value="unset">
+		
+    <input type="hidden" name="videos86" id="videos86" value="unset">
+		
+    <input type="hidden" name="videos87" id="videos87" value="unset">
+		
+    <input type="hidden" name="videos88" id="videos88" value="unset">
+		
+    <input type="hidden" name="videos89" id="videos89" value="unset">
+		
+    <input type="hidden" name="videos90" id="videos90" value="unset">
+		
+    <input type="hidden" name="videos91" id="videos91" value="unset">
+		
+    <input type="hidden" name="videos92" id="videos92" value="unset">
+		
+    <input type="hidden" name="videos93" id="videos93" value="unset">
+		
+    <input type="hidden" name="videos94" id="videos94" value="unset">
+		
+    <input type="hidden" name="videos95" id="videos95" value="unset">
+		
+    <input type="hidden" name="videos96" id="videos96" value="unset">
+		
+
+		
+
+  </body>
+</html>
