@@ -1,0 +1,698 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<style>
+			.stop {
+			 animation-name: none !important;
+			 -webkit-animation-name: none !important;
+			}
+			/* * { border: 1px solid yellow; }
+			https://eggplantstudios.ca/2012/fixing-a-blank-white-space-at-the-bottom-of-your-website/
+			 */
+			#old_bottom_left_addons {
+			  position: absolute;
+			  bottom: 0px;
+			   margin-right: auto;
+			   margin-left: auto;
+			   left: 0px;
+			   font-size:12pt;
+			}
+			#traintest video {
+		   display: block;
+			}
+			video
+			{
+			    /* max-height: 95vh;
+			    max-width: 95%; */
+			    max-height: 100vh;
+			    max-width: 100%;
+			}
+			/* https://stackoverflow.com/questions/19461521/how-to-center-an-element-horizontally-and-vertically */
+			.center {
+			  position: absolute;
+			  top: 50%;
+			  left: 50%;
+			  width: 100vw;
+			  -moz-transform: translateX(-50%) translateY(-50%);
+			  -webkit-transform: translateX(-50%) translateY(-50%);
+			  transform: translateX(-50%) translateY(-50%);
+			}
+			.slidecontainer {
+  width: 100%;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 25px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #007bff;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #007bff;
+  cursor: pointer;
+}
+		</style>
+		
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+	  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+		
+		<!-- <link rel="stylesheet" href="css/font-awesome.min.css"> -->
+		<script type="text/javascript">
+		// the script in the html pages might need to call function in utils.zjs
+			 // test cases: golden video broken
+// prepare vid names: testVids and trainVids
+// const video lists
+const GOLDEN = [];
+const TRAINS = [];
+const LABELS = ['chtvma-Conservation_Commission_-_January_5_2021', 'Livonia_City_Council_Study_Meeting_-_May_27_2020', 'colmd-Virtual_19th_Mayor_and_City_Council_Meeting_-_November_9_2020', 'tccca-Torrance_City_Council_Meeting_-_December_1_2020_-_Part_2', 'soatvma-Somerset_Board_of_Selectmen_-_April_22_2020', 'bctvct-Board_of_Selectmen_Special_Zoom_Meeting_-_07_22_2020'];
+const BACKUP = []; // don'trainVids shuffle BACKUP videos, if there is one borken video, we will always have backup1 rated instead.
+function get_repeat_vids(vids) {
+	var arr = [];
+	var repeat = [];
+	while(arr.length < 0){
+		var r = Math.floor(Math.random() * vids.length );
+		if(arr.indexOf(r) === -1){
+			repeat.push(vids[r]);
+			arr.push(r);
+		}
+	} // https://stackoverflow.com/a/2380113
+	return repeat;
+}
+const REPEAT = get_repeat_vids(LABELS);
+const MIN_REPEAT_DISTANCE = 0;
+
+// random sample (k) videos from a video list (vids)
+// return [] if k <= 0
+
+const PHASES = ['survey', 'pre_test', 'done'];
+var thisPhase;
+var nextPhase = PHASES[0];
+var debug_mode = false; // false initally, will be updated later
+var currentVid = null;
+var phaseIndex = 0;
+
+function next() {
+	// show html only this phase
+	thisPhase = nextPhase;
+
+	$('div[id^=phase]').hide();
+	$('div[id=phase\\:' +thisPhase+ ']').show();
+
+	console.log('[' + thisPhase + ']');
+
+	
+
+	
+
+	// call function according to current phase:
+	// instruction --> call instruction()
+	// quiz --> call quiz()
+	document.body.style.backgroundColor = "white";
+
+	// call this phase and get next phase
+	// nextPhase = ( window[thisPhase]() == 'repeat')? thisPhase : PHASES [PHASES.indexOf(thisPhase) + 1];
+	if (window[thisPhase]() != 'repeat')
+	{
+		phaseIndex += 1;
+		nextPhase =  PHASES [phaseIndex];
+	}
+	// nextPhase = ( window[thisPhase]() == 'repeat')? thisPhase : PHASES [phase_idx + 1]; # duplicated phases
+}
+
+var trainVids = {idx:0, names:[], elements: []};
+var testVids = {idx:0, names:[], elements: []}; // including repeated, golden, and label videos
+var thisVids = testVids;
+
+trainVids.names.push(...TRAINS);
+testVids.names.push(...LABELS);
+testVids.names.push(...REPEAT);
+testVids.names.push(...GOLDEN);
+
+
+
+if(MIN_REPEAT_DISTANCE > 1) {
+	// it will change the arr dyncamically...
+	REPEAT.forEach( function(v, idx) {
+		// find occurances:
+		var first = testVids.names.indexOf(v);
+		var second = testVids.names.indexOf(v, first+1);
+
+		if (second - first < MIN_REPEAT_DISTANCE) {
+			// console.log('-------Distance change: ' + idx + ':' + first + '-' +  second)
+			var i = second
+			var j = ( first + MIN_REPEAT_DISTANCE ) % testVids.names.length;
+			[testVids.names[i], testVids.names[j]] = [testVids.names[j], testVids.names[i]];
+		}
+	} );
+}
+
+
+// turk.js
+// is_assigned
+// for rejections
+// int|
+var train_delay = 0;
+
+
+
+$(document).ready(function(){
+	// load_vid(vids, vids.idx + num_videos_cache_at_beginning - 1);
+	// don't cache video at beginning
+	next();
+});
+		</script>
+  </head>
+  <body>
+		<nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <!-- <a class="navbar-brand" href="#">Navbar</a> -->
+  <div class="collapse navbar-collapse" id="navbarSupportedContent">
+    <ul class="navbar-nav mr-auto">
+			
+			<li class="nav-item">
+				<script>
+  function saveResult() {
+    
+      $('#consoleLog').val(logMessages.join('\n'));
+    
+    var s = "";
+    
+
+    
+    $('select[name^=survey]').each(function(index){
+      console.log(this.name + ' = ' + this.value)
+      s += this.name + ',' + '"' + this.value + '"' + '\n';
+    });
+    
+
+    $('input[name^=record]').each(function(index){
+      s += this.id + ',' + '"' + this.value + '"' + '\n';
+    });
+
+    $('input[id^=videos]').each(function(index){
+      console.log(this.id + ':' + LABELS[index] + ' = ' + this.value)
+      s += LABELS[index] + ',' + '"' + this.value + '"' + '\n';
+    });
+    // no survey pages
+    // $('#survey input').each(function(index){
+    //   s += this.name + ',' + '"' + this.value + '"' + '\n';
+    // });
+
+
+  	csv = 'data:text/csv;charset=utf-8,' + s;
+  	data = encodeURI(csv);
+    link = document.createElement('a');
+    link.setAttribute('href', data);
+    link.setAttribute('download', 'results.csv'); // g5+s4
+    link.click();
+
+  }
+</script>
+
+<button class="btn btn-primary btn-xl nextButton" type="button" onclick = 'saveResult()'>
+  <!-- <i class="fa fa-download" aria-hidden="true"></i> -->
+  Results
+</button>
+			</li>
+			
+			<li class="nav-item">
+				<script>
+// overwrite console.log so that it includes timestamp and also write to both a string and the console
+// https://stackoverflow.com/questions/24052775/how-to-get-the-console-log-content-as-string-in-javascript
+var logBackup = console.log; // console.log with timestamp
+var logMessages = [];
+
+console.log = function() {
+  var timestamp = new Date().toJSON(); // The easiest way I found to get milliseconds in the timestamp
+  var args = arguments;
+
+  logBackup.apply(console, arguments); // console don't show timestamp
+  args[0] = timestamp + ' > ' + arguments[0];
+  logMessages.push.apply(logMessages, args);
+};
+
+function copyDebugInfo() {
+  var copyText = document.getElementById("helpMsg");
+  copyText.select();
+  copyText.setSelectionRange(0, 99999)
+  document.execCommand("copy");
+  // alert("Copied the text: " + copyText.value);
+  document.getElementById("helpBtn").textContent  = 'Information Copied!';
+}
+</script>
+
+<input type="hidden" name="record.log" id="consoleLog" value="unset">
+<a class="nav-link" onclick="javascript:if(currentVid){currentVid.pause();}" onmouseover="$('textarea#helpMsg').val(logMessages.join('\n'));" data-toggle="modal" data-target="#modalHelp" id="btnHlep">
+  Help
+</a>
+
+
+<!-- Modal -->
+<div class="modal fade" id="modalHelp" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Need some help?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body"  style="font-size:medium;">
+        We are sorry if you encounter any problem.
+
+        
+            <br>
+            1. click the "Results" button on the top left corner to export your current progress.
+            <br>
+            2. email <a href="mailto:zqying@utexas.edu">zqying@utexas.edu</a> with the exported file attached, describe what you observed.
+        
+
+        Thank you!
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary btn-xl" data-dismiss="modal" onclick="javascript:if(currentVid){currentVid.play();}">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+ <!-- color: rgb(234, 18, 18);background-color: #EEE; -->
+			</li>
+			
+			<li class="nav-item">
+				<script type="text/javascript">
+  function show_howto() {
+        $('#modalHowto').modal({
+        backdrop: 'static',
+        keyboard: false  // to prevent closing with Esc button (if you want this too)
+    })
+  }
+</script>
+
+
+
+<!-- <a class="nav-link" data-toggle="modal" data-target="#modalHowto" onclick="javascript:if(currentVid){currentVid.pause();}" id="btnHlep">
+  Instructions
+</a> -->
+
+<a class="nav-link" onclick="show_howto()">
+  Instructions
+</a>
+
+<!-- <div class="alert alert-secondary" id="rating_instructions" align="center">
+  <img src="https://sandboxtestvideos.s3.us-east-2.amazonaws.com/samples/slider_demo.png" alt="Rating Interface"
+  width="45%" height="30%">
+</div> -->
+  <!-- Modal -->
+  <div class="modal fade" id="modalHowto" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">HOW TO RATE A VIDEO:</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body"  style="font-size:medium;">
+          <br />
+          <ol>
+              <li>After each video has been played, a rating bar will appear, calibrated on a <b>continuous scale (0-100)</b> from BAD to EXCELLENT. Five pointers - "BAD," "POOR," "FAIR," "GOOD," and "EXCELLENT" are placed at equal intervals on top of the scale to guide you. The interface is as shown in the figure below.</li>
+              <li>Rate the video by using the mouse to move your rating to the score (position) you think best represents the quality of the video. NOTE THAT YOU MAY MOVE THE MARKER <b>ANYWHERE ON THE SLIDER</b>, <b>NOT ONLY</b> AT THE 5 POINTERS (BAD-EXCELLENT). </li>
+              <li>Drag the cursor along the scale and its final position will be considered as your response once you click <b>Submit</b>. </li>
+              <li>For every video we display, we have intentionally placed the marker at a random initial position. </li>
+              <li>You will not be able to submit your rating and proceed to the next video unless you have moved the cursor. Please do not give random ratings, because we will detect this and boot you from the study. </li>
+              <!-- <li>Please take this study seriously and do not give random ratings, we will detect this. </li> -->
+          </ol>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary btn-xl" data-dismiss="modal" onclick="javascript:if(currentVid){currentVid.play();}" >OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+			</li>
+			
+    </ul>
+    <form class="form-inline my-2 my-lg-0">
+      <!-- <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search"> -->
+      <!-- <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button> -->
+		</form>
+
+  </div>
+</nav>
+		<div id='addons'>
+			
+	    	<script type="text/javascript">
+  $(document).ready(function() {
+    document.addEventListener('start_watching', function(e) {
+      document.body.style.backgroundColor = "black";
+    }, false);
+    document.addEventListener('done_watching', function(e) {
+      document.body.style.backgroundColor = "white";
+    }, false);
+  });
+</script>
+			
+	    	<script type="text/javascript">
+  var last_progress = 0;
+
+  $(document).ready(function(){
+    document.addEventListener('done_watching', function (e) {
+      // show progress every 10% done
+    	// showing the number of videos will scare people away
+    	// showing the precentage for every video introduce stress
+      // (index+1) + " out of " + (vids.items.length)
+      // instead of showing the exact number, it's better to show a percentage
+      let index = thisVids.idx;
+    	if (index <= 1) {last_progress = 0;} // reset
+    	let progress = (index)/(thisVids.names.length)*100;
+    	if (progress - last_progress > 10) {
+    		$('#submit_info').html(parseInt(progress) + '% Done');
+    		last_progress = progress;
+    	} else {
+    		$('#submit_info').html('');
+    	}
+    }, false);
+  });
+</script>
+			
+	    	<!-- session_info: storing session information including the names of testing videos after shuffling -->
+<!-- <input type="hidden" name="record" id="browserWindowSize" value="unset"> -->
+<!-- <input type="hidden" name="record" id="nanDelay" value="unset"> -->
+<input type="hidden" name="record" id="testVidList" value="unset">
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('#testVidList').val(testVids.names.join('\n'));
+  });
+</script>
+			
+	    	<script type="text/javascript">
+  var t00;
+  $(document).ready(function() {
+    document.addEventListener('start_watching', function(e) {
+      t00 = performance.now();
+    }, false);
+    document.addEventListener('done_watching', function(e) {
+      if (currentVid != null) {
+        // is it possible currentVid changed? No
+        var t0 = currentVid.timeStart;
+        if (t0 != undefined) {
+          t00 = t0;
+        } // wait until time runs out
+        var t1 = performance.now();
+        // let duration = isNan(currentVid.duration)?
+        delay = ((t1 - t00) / 1000) - currentVid.duration; // now the duration is ready
+        // the same video? what if it get replaced?
+        // repeated video
+        // sessionStorage['delay'] = isNaN(delay)? 'start=' + t00 + ';end=' + t1 + ';duration=' + currentVid.duration : delay;
+        sessionStorage['delay'] = delay.toFixed(2);
+
+        if (isNaN(delay)) { // only for nan videos
+          let selected = $('#nanDelay');
+          let info = currentVid.src + ' :start=' + t00.toFixed(2) + '&end=' + t1.toFixed(2) + '&duration=' + currentVid.duration;
+          if (selected.val() == "unset") {
+            selected.val(info);
+          } else { // append the value
+            selected.val(selected.val() + ' | ' + info);
+          }
+        }
+        console.log("Time taken: " + (t1 - t0) / 1000);
+        console.log("Train Delay: " + train_delay);
+        console.log("Delay: " + delay);
+
+        
+        // redo the video if speedup
+        if ( delay < -0.5) {
+          
+          reject('Please disable your speedup plugin and try again.');
+          
+        }
+        
+      }
+    }, false);
+  });
+</script>
+			
+		</div>
+
+		
+      <script type="text/javascript">
+  function survey() {
+
+  }
+
+  function checkSurvey() {
+    if(validSurvey()) {
+      next();
+    } else {
+      alert('Please answer all before submitting!');
+    }
+  }
+  function validSurvey() {
+    // https://stackoverflow.com/questions/6920606/jquery-how-to-check-if-all-radio-buttons-in-a-div-are-selected
+    // $('[name=age]:checked').val() === undefined;
+    let ok = true;
+    $('select[name^=survey]').each(function(index){
+       if (this.selectedIndex <= 0 ) {
+          ok = false;
+       } else {
+         console.log(this.name + ' = ' + this.value + ':' + this.selectedIndex);
+       }
+    });
+    return ok;
+  }
+</script>
+
+<style>
+  input[type="text"],
+select.form-control {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #000000;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border-radius: 0;
+  width: 20%;
+}
+
+input[type="text"]:focus,
+select.form-control:focus {
+  -webkit-box-shadow: none;
+  box-shadow: none;
+}
+</style>
+
+<div id='phase:survey' width="100%" class="center">
+  <section class="py-5">
+    <div class="container my-auto">
+
+      <h1>Well done! </h1>
+      <br>
+      Before entering the testing session, let's finish a short survey!
+      <br>
+      <!-- Please rename the output csv file with your name and EID (Format: "Your group no." + "Your current session no." + "Your EID"+ "First Name"+ "LastName".csv, Please keep the "+"sign.), and submit through Canvas before end of Thursday, Nov. 12th. -->
+      <br>
+
+      <!-- <div class="form-group">
+        <label for="name" class="control-label">Name</label>
+        <input type="text" name="name" class="form-control" id="name" value="test">
+      </div> -->
+
+      <div class="form-group">
+        <label for="survey_bother" class="control-label">Does the quality of telepresence videos (e.g. ZOOM) ever bother you?</label>
+        <select class="form-control" name="survey_bother">
+          <option disabled selected value> -- select an option -- </option>
+          <option>Yes</option>
+          <option>No</option>
+          <option>I don't really care!</option>
+          <option>Aren't all videos of same quality?</option>
+        </select>
+
+      </div>
+      <div class="form-group">
+
+        <label for="survey_dev" class="control-label">What device do you use for remote telepresence videos most often?</label>
+        <select class="form-control" name="survey_dev">
+          <option disabled selected value> -- select an option -- </option>
+          <option>Laptop</option>
+          <option>Desktop</option>
+          <option>Tablet</option>
+          <option>Others</option>
+        </select>
+
+      </div>
+      <div class="form-group">
+
+        <!-- <p>Which display device (monitor) are you using to view the videos and perform this task?</p> -->
+        <label for="survey_video" class="control-label">Which display device (monitor) are you using to perform this task?
+        </label>
+        <select class="form-control" name="survey_video">
+          <option disabled selected value> -- select an option -- </option>
+          <option>Phone Screen</option>
+          <option>Tablet Screen</option>
+          <option>Desktop Monitor</option>
+          <option>Laptop Screen</option>
+          <option>HDTV screen</option>
+          <option>Others</option>
+
+        </select>
+
+      </div>
+      <div class="form-group">
+        <label for="survey_specific_display" class="control-label">Specific Display Device (e.g. Microsoft surface laptop 3):</label>
+        <input type="text" name="survey_specific_display" value="">
+      </div>
+      <div class="form-group">
+
+        <label for="survey_audio" class="control-label">Which audio device are you using to perform this task?
+        </label>
+        <select class="form-control" name="survey_audio">
+          <option disabled selected value> -- select an option -- </option>
+          <option>Built-in speaker</option>
+          <option>Wired headphones</option>
+          <option>Wired external speaker</option>
+          <option>Bluetooth headphones</option>
+          <option>Bluetooth speakers</option>
+          <option>Others</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="survey_specific_audio" class="control-label">Specific Audio Device (e.g. Apple AirPods 2):</label>
+        <input type="text" name="survey_specific_audio" value="">
+      </div>
+
+      <!-- <p>Do you have any additional comments for us?</p>
+      <div align='center'>
+        <textarea name="comments" rows="5" cols="30"></textarea>
+      </div> -->
+
+      <button type="button" id="nextButton" class="btn btn-primary btn-xl nextButton" onclick="checkSurvey()">
+        <span style='font-size:16pt'>Submit</span>
+      </button>
+    </div>
+  </section>
+</div>
+		
+      <script>
+  function pre_test() {
+    thisVids = testVids;
+  	
+  	// setTimeout(function() {$('#divNextButton').show();},2000);
+  }
+</script>
+
+<div id="phase:pre_test" width="100%" class="slidecontainer" align=center>
+  <!-- disabled=true -->
+  <div class="center">
+    You are entering the testing session.
+    <hr>
+    <button type="button" id="nextButton" class="btn btn-primary btn-xl nextButton" onclick="next()">
+      <span style='font-size:16pt'>Click to Continue</span>
+    </button>
+  </div>
+</div>
+		
+      <script type="text/javascript">
+  function done() {
+    document.dispatchEvent(new Event('session_end'));
+  	// configuration and thanks
+    currentVid = null;
+  
+  	$('#done').show();
+  	// $('#survey_box').animate({right: '-100%'});
+  	$('#survey').hide();
+  	$('#divNextButton').hide();
+  	$("#submitButton").show();
+    $("#submitButton").prop('disabled', false);
+  	$("#submitButton").css("visibility", "visible");
+  	$('<input/>').attr({type:'hidden',name:'welldone',value:'yes'}).appendTo('#survey');
+  	// closeFullscreen();
+    
+      saveResult();
+    
+  }
+</script>
+
+<div id='phase:done' width="100%" class="center">
+  <section class="py-5">
+    <div class="container my-auto">
+
+      <h1>Thank you so much for your participation!</h1>
+      <br>
+      Your results should have been downloaded. If not, Please click button <b>"Results"</b> in the left top corner to save the data.
+      Please email the result file to <a href="mailto:zqying@utexas.edu">zqying@utexas.edu</a>.
+      You can close this page after saving the result.
+      <br>
+      <!-- Please rename the output csv file with your name and EID (Format: "Your group no." + "Your current session no." + "Your EID"+ "First Name"+ "LastName".csv, Please keep the "+"sign.), and submit through Canvas before end of Thursday, Nov. 12th. -->
+      <br>
+
+    </div>
+  </section>
+</div>
+		
+		<div id='phase:reject' class="center">
+  <section class="py-5">
+    <div class="container my-auto">
+      <h1> Sorry!</h1>
+      You are not able to proceed because:
+      <p id='reasonRejected'></p>
+    </div>
+  </section>
+</div>
+<script type="text/javascript">
+  function reject(msg="You may have violated one of our Ethics policies.", retry=true) {
+    $('div[id^=phase]').hide();
+  	$('#phase\\:reject').show();
+  	// console.log('user [' + $.getUrlVar('assignmentId') + '] rejected because of ' + msg);
+  	$('#reasonRejected').html(msg);
+   	// $('#submitButton').remove();
+   	// record information?
+   	// $('#divNextButton').hide();
+  	// phase = 'reject'
+  }
+</script>
+
+		
+    <input type="hidden" name="videos1" id="videos1" value="unset">
+		
+    <input type="hidden" name="videos2" id="videos2" value="unset">
+		
+    <input type="hidden" name="videos3" id="videos3" value="unset">
+		
+    <input type="hidden" name="videos4" id="videos4" value="unset">
+		
+    <input type="hidden" name="videos5" id="videos5" value="unset">
+		
+    <input type="hidden" name="videos6" id="videos6" value="unset">
+		
+
+		
+
+  </body>
+</html>
