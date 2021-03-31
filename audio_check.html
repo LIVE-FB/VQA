@@ -1,0 +1,945 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN">
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<style>
+			.stop {
+			 animation-name: none !important;
+			 -webkit-animation-name: none !important;
+			}
+			/* * { border: 1px solid yellow; }
+			https://eggplantstudios.ca/2012/fixing-a-blank-white-space-at-the-bottom-of-your-website/
+			 */
+			#old_bottom_left_addons {
+			  position: absolute;
+			  bottom: 0px;
+			   margin-right: auto;
+			   margin-left: auto;
+			   left: 0px;
+			   font-size:12pt;
+			}
+			#traintest video {
+		   display: block;
+			}
+			video
+			{
+			    /* max-height: 95vh;
+			    max-width: 95%; */
+			    max-height: 100vh;
+			    max-width: 100%;
+			}
+			/* https://stackoverflow.com/questions/19461521/how-to-center-an-element-horizontally-and-vertically */
+			.center {
+			  position: absolute;
+			  top: 50%;
+			  left: 50%;
+			  width: 100vw;
+			  -moz-transform: translateX(-50%) translateY(-50%);
+			  -webkit-transform: translateX(-50%) translateY(-50%);
+			  transform: translateX(-50%) translateY(-50%);
+			}
+			.slidecontainer {
+  width: 100%;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 25px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #007bff;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #007bff;
+  cursor: pointer;
+}
+			input[type="text"],
+select.form-control {
+background: transparent;
+border: none;
+border-bottom: 1px solid #000000;
+-webkit-box-shadow: none;
+box-shadow: none;
+border-radius: 0;
+/* width: 20%; */
+width: 40%;
+}
+
+input[type="text"]:focus,
+select.form-control:focus {
+-webkit-box-shadow: none;
+box-shadow: none;
+}
+		</style>
+		
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+	  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+	  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+		
+		<!-- <link rel="stylesheet" href="css/font-awesome.min.css"> -->
+		<script type="text/javascript">
+		// the script in the html pages might need to call function in utils.zjs
+			 // test cases: golden video broken
+// prepare vid names: testVids and trainVids
+// const video lists
+var BASE_URL = "https://mainstudy.s3.us-east-2.amazonaws.com/year3/";
+const GOLDEN = [];
+const TRAINS = [];
+const LABELS = ['chtvma-Conservation_Commission_-_January_5_2021', 'Livonia_City_Council_Study_Meeting_-_May_27_2020', 'colmd-Virtual_19th_Mayor_and_City_Council_Meeting_-_November_9_2020', 'tccca-Torrance_City_Council_Meeting_-_December_1_2020_-_Part_2', 'soatvma-Somerset_Board_of_Selectmen_-_April_22_2020', 'bctvct-Board_of_Selectmen_Special_Zoom_Meeting_-_07_22_2020'];
+const BACKUP = []; // don'trainVids shuffle BACKUP videos, if there is one borken video, we will always have backup1 rated instead.
+function get_repeat_vids(vids) {
+	var arr = [];
+	var repeat = [];
+	while(arr.length < 0){
+		var r = Math.floor(Math.random() * vids.length );
+		if(arr.indexOf(r) === -1){
+			repeat.push(vids[r]);
+			arr.push(r);
+		}
+	} // https://stackoverflow.com/a/2380113
+	return repeat;
+}
+const REPEAT = get_repeat_vids(LABELS);
+const MIN_REPEAT_DISTANCE = 0;
+
+// random sample (k) videos from a video list (vids)
+// return [] if k <= 0
+
+const PHASES = ['audio_check', 'done'];
+var thisPhase;
+var nextPhase = PHASES[0];
+var debug_mode = false; // false initally, will be updated later
+var currentVid = null;
+var phaseIndex = 0;
+
+function next(phase=null) {
+	// show html only this phase
+	thisPhase = phase==null? nextPhase:phase;
+
+	$('div[id^=phase]').hide();
+	$('div[id=phase\\:' +thisPhase+ ']').show();
+
+	console.log('[' + thisPhase + ']');
+
+	
+
+	
+
+	// call function according to current phase:
+	// instruction --> call instruction()
+	// quiz --> call quiz()
+	document.body.style.backgroundColor = "white";
+
+	// call this phase and get next phase
+	// nextPhase = ( window[thisPhase]() == 'repeat')? thisPhase : PHASES [PHASES.indexOf(thisPhase) + 1];
+	if (window[thisPhase]() != 'repeat')
+	{
+		phaseIndex += 1;
+		nextPhase =  PHASES [phaseIndex];
+	}
+	// nextPhase = ( window[thisPhase]() == 'repeat')? thisPhase : PHASES [phase_idx + 1]; # duplicated phases
+}
+
+var trainVids = {idx:0, names:[], elements: []};
+var testVids = {idx:0, names:[], elements: []}; // including repeated, golden, and label videos
+var thisVids = testVids;
+
+trainVids.names.push(...TRAINS);
+testVids.names.push(...LABELS);
+testVids.names.push(...REPEAT);
+testVids.names.push(...GOLDEN);
+
+
+
+if(MIN_REPEAT_DISTANCE > 1) {
+	// it will change the arr dyncamically...
+	REPEAT.forEach( function(v, idx) {
+		// find occurances:
+		var first = testVids.names.indexOf(v);
+		var second = testVids.names.indexOf(v, first+1);
+
+		if (second - first < MIN_REPEAT_DISTANCE) {
+			// console.log('-------Distance change: ' + idx + ':' + first + '-' +  second)
+			var i = second
+			var j = ( first + MIN_REPEAT_DISTANCE ) % testVids.names.length;
+			[testVids.names[i], testVids.names[j]] = [testVids.names[j], testVids.names[i]];
+		}
+	} );
+}
+
+
+// turk.js
+// is_assigned
+// for rejections
+// int|
+var train_delay = 0;
+
+
+
+$(document).ready(function(){
+	// load_vid(vids, vids.idx + num_videos_cache_at_beginning - 1);
+	// don't cache video at beginning
+	next();
+});
+		</script>
+  </head>
+  <body>
+		
+			<script type="text/javascript">
+  // https://stackoverflow.com/a/40299522/5181908
+  $.fn.timedDisable = function(time) {
+     if (time == null) {
+       time = 5;
+     }
+     var seconds = Math.ceil(time); // Calculate the number of seconds
+     return $(this).each(function() {
+       $(this).attr('disabled', 'disabled');
+       var disabledElem = $(this);
+       var originalText = this.innerHTML; // Remember the original text content
+
+       // append the number of seconds to the text
+       disabledElem.text(originalText + ' (' + seconds + ')');
+
+       // do a set interval, using an interval of 1000 milliseconds
+       //     and clear it after the number of seconds counts down to 0
+       var interval = setInterval(function() {
+         seconds = seconds - 1;
+         // decrement the seconds and update the text
+         disabledElem.text(originalText + ' (' + seconds + ')');
+         if (seconds === 0) { // once seconds is 0...
+           disabledElem.removeAttr('disabled')
+             .text(originalText); //reset to original text
+           clearInterval(interval); // clear interval
+         }
+       }, 1000);
+     });
+   };
+  function show_howto() {
+    $('#modalHowto').modal({
+        backdrop: 'static',
+        keyboard: false  // to prevent closing with Esc button (if you want this too)
+    });
+    $('#btnCloseInstruction').timedDisable(10);
+  }
+  $(document).ready(function() {
+    document.addEventListener('start_watching', function(e) {
+      $('#btnHowto').hide();
+    }, false);
+    document.addEventListener('done_watching', function(e) {
+      $('#BtnHowto').show();
+    }, false);
+  });
+
+</script>
+
+
+<!-- <div class="alert alert-secondary" id="rating_instructions" align="center">
+  <img src="https://sandboxtestvideos.s3.us-east-2.amazonaws.com/samples/slider_demo.png" alt="Rating Interface"
+  width="45%" height="30%">
+</div> -->
+  <!-- Modal -->
+  <div class="modal fade" id="modalHowto" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">HOW TO RATE A VIDEO:</h5>
+          <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button> -->
+        </div>
+        <div class="modal-body"  style="font-size:medium;">
+          <br />
+          <ol>
+              <li>After each video has been played, a rating bar will appear, calibrated on a <b>continuous scale (0-100)</b> from BAD to EXCELLENT. Five pointers - "BAD," "POOR," "FAIR," "GOOD," and "EXCELLENT" are placed at equal intervals on top of the scale to guide you. The interface is as shown in the figure below.</li>
+              <li>Rate the video by using the mouse to move your rating to the score (position) you think best represents the quality of the video. NOTE THAT YOU MAY MOVE THE MARKER <b>ANYWHERE ON THE SLIDER</b>, <b>NOT ONLY</b> AT THE 5 POINTERS (BAD-EXCELLENT). </li>
+              <li>Drag the cursor along the scale and its final position will be considered as your response once you click <b>Submit</b>. </li>
+              <li>For every video we display, we have intentionally placed the marker at a random initial position. </li>
+              <li>You will not be able to submit your rating and proceed to the next video unless you have moved the cursor. Please do not give random ratings, because we will detect this and boot you from the study. </li>
+              <!-- <li>Please take this study seriously and do not give random ratings, we will detect this. </li> -->
+          </ol>
+        </div>
+        <div class="modal-footer">
+          <button id="btnCloseInstruction" type="button" class="btn btn-primary btn-xl" data-dismiss="modal">OK</button>
+        </div>
+      </div>
+    </div>
+  </div>
+		
+			<script>
+  // https://stackoverflow.com/questions/34156282/how-do-i-save-json-to-local-text-file
+  function download(content, fileName, contentType) {
+    var a = document.createElement("a");
+    var file = new Blob([content], {type: contentType});
+    a.href = URL.createObjectURL(file);
+    a.download = fileName;
+    a.click();
+  }
+
+  // deprecated
+  function saveAsJson() {
+    document.dispatchEvent(new Event('export_results'));
+    let data = {};
+    
+
+    
+
+    $('input[name^=record]').each(function(index){
+      console.log(this.id + ' = ' + this.value)
+      data[this.id] =  '"' + this.value + '"';
+    });
+
+    $('input[id^=videos]').each(function(index){
+      console.log(this.id + ':' + LABELS[index] + ' = ' + this.value)
+      data[LABELS[index]] =  '"' + this.value + '"';
+    });
+    var jsonData = JSON.stringify(data);
+    download(jsonData, 'json.txt', 'text/plain');
+  }
+
+  function saveAsCSV() {
+    document.dispatchEvent(new Event('export_results'));
+    
+    var s = "category,item,value\n"; // add head layers
+
+    
+
+    $('input[id^=videos]').each(function(index){
+      console.log(this.id + ':' + LABELS[index] + ' = ' + this.value)
+      s +=  `rating,${LABELS[index]},"${this.value}"\n`;
+    });
+
+    $('input[name^=record]').each(function(index){
+      s +=  `record,${this.id},"${this.value}"\n`;
+    });
+
+  	csv = 'data:text/csv;charset=utf-8,' + s;
+  	data = encodeURI(csv);
+    link = document.createElement('a');
+    link.setAttribute('href', data);
+    link.setAttribute('download', 'results.csv'); // g5+s4
+    link.click();
+  }
+</script>
+
+<div class="modal fade" id="modalExport" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Export current progress?</h5>
+        <!-- <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button> -->
+      </div>
+      <div class="modal-body"  style="font-size:medium;">
+        The results will be automatically exported in the end of this study.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="saveAsCSV()" >Sure</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">No, I'll continue</button>
+      </div>
+    </div>
+  </div>
+</div>
+		
+
+		
+		<div id='addons'>
+			
+	    	<script type="text/javascript">
+  $(document).ready(function() {
+    document.addEventListener('start_watching', function(e) {
+      document.body.style.backgroundColor = "black";
+    }, false);
+    document.addEventListener('done_watching', function(e) {
+      document.body.style.backgroundColor = "white";
+    }, false);
+  });
+</script>
+			
+	    	<script type="text/javascript">
+  var last_progress = 0;
+
+  $(document).ready(function(){
+    document.addEventListener('done_watching', function (e) {
+      // show progress every 10% done
+    	// showing the number of videos will scare people away
+    	// showing the precentage for every video introduce stress
+      // (index+1) + " out of " + (vids.items.length)
+      // instead of showing the exact number, it's better to show a percentage
+      let index = thisVids.idx;
+    	if (index <= 1) {last_progress = 0;} // reset
+    	let progress = (index)/(thisVids.names.length)*100;
+    	if (progress - last_progress > 10) {
+    		$('#submit_info').html(parseInt(progress) + '% Done');
+    		last_progress = progress;
+    	} else {
+    		$('#submit_info').html('');
+    	}
+    }, false);
+  });
+</script>
+			
+	    	<!-- session_info: storing session information including the names of testing videos after shuffling -->
+<!-- <input type="hidden" name="record" id="browserWindowSize" value="unset"> -->
+<!-- <input type="hidden" name="record" id="nanDelay" value="unset"> -->
+<input type="hidden" name="record" id="testVidList" value="unset">
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    $('#testVidList').val(testVids.names.join('\n')); // inintial list 
+  });
+</script>
+			
+	    	<script type="text/javascript">
+  function isFullscreen() {
+  	return (window.fullScreen) ||
+  	 (window.innerWidth == screen.width && window.innerHeight == screen.height)
+  }
+
+
+  function openFullscreen() {
+  // https://stackoverflow.com/questions/2863351/checking-if-browser-is-in-fullscreen
+  // https://stackoverflow.com/questions/1125084/how-to-make-the-window-full-screen-with-javascript-stretching-all-over-the-scre
+  	if ( !isFullscreen() )
+  	{
+  		// set fullscreen
+  		// console.log('Browser is not in fullscreen. Please revert back.');
+  		var el = document.documentElement
+  		, rfs = // for newer Webkit and Firefox
+  							 el.requestFullscreen
+  						|| el.webkitRequestFullScreen /* Chrome, Safari & Opera */
+  						|| el.mozRequestFullScreen /* Firefox */
+  						|| el.msRequestFullscreen /* IE/Edge */
+  		;
+  		if(typeof rfs!="undefined" && rfs){
+  			rfs.call(el);
+  		} else if(typeof window.ActiveXObject!="undefined"){
+  			// for Internet Explorer
+  			var wscript = new ActiveXObject("WScript.Shell");
+  			if (wscript!=null) {
+  				 wscript.SendKeys("{F11}");
+  			}
+  		}
+  	}
+  }
+
+  /* Close fullscreen */
+  function closeFullscreen() {
+  if (document.exitFullscreen) {
+  	document.exitFullscreen();
+  } else if (document.webkitExitFullscreen) { /* Safari */
+  	document.webkitExitFullscreen();
+  } else if (document.msExitFullscreen) { /* IE11 */
+  	document.msExitFullscreen();
+  }
+  }
+
+  
+</script>
+			
+	    	<script type="text/javascript">
+  var t00;
+  $(document).ready(function() {
+    document.addEventListener('start_watching', function(e) {
+      t00 = performance.now();
+    }, false);
+    document.addEventListener('done_watching', function(e) {
+      if (currentVid != null) {
+        // is it possible currentVid changed? No
+        var t0 = currentVid.timeStart;
+        if (t0 != undefined) {
+          t00 = t0;
+        } // wait until time runs out
+        var t1 = performance.now();
+        // let duration = isNan(currentVid.duration)?
+        delay = ((t1 - t00) / 1000) - currentVid.duration; // now the duration is ready
+        // the same video? what if it get replaced?
+        // repeated video
+        // sessionStorage['delay'] = isNaN(delay)? 'start=' + t00 + ';end=' + t1 + ';duration=' + currentVid.duration : delay;
+        sessionStorage['delay'] = delay.toFixed(2);
+
+        if (isNaN(delay)) { // only for nan videos
+          let selected = $('#nanDelay');
+          let info = currentVid.src + ' :start=' + t00.toFixed(2) + '&end=' + t1.toFixed(2) + '&duration=' + currentVid.duration;
+          if (selected.val() == "unset") {
+            selected.val(info);
+          } else { // append the value
+            selected.val(selected.val() + ' | ' + info);
+          }
+        }
+        console.log("Time taken: " + (t1 - t0) / 1000);
+        console.log("Train Delay: " + train_delay);
+        console.log("Delay: " + delay);
+
+        
+        // redo the video if speedup
+        if ( delay < -0.5) {
+          
+          reject('Please disable your speedup plugin and try again.');
+          
+        }
+        
+      }
+    }, false);
+  });
+</script>
+			
+	    	 <!-- sytem_info.html --------------------------------------------------------->
+<input type="hidden" name="record.sys" id="osName" value="unset">
+<input type="hidden" name="record.sys" id="browser" value="unset">
+<input type="hidden" name="record.sys" id="mobile" value="unset">
+<input type="hidden" name="record.sys" id="screenSize" value="unset">
+
+<script>
+  (function (window) {
+      {
+      /* test cases
+          alert(
+              'browserInfo result: OS: ' + browserInfo.os +' '+ browserInfo.osVersion + '\n'+
+                  'Browser: ' + browserInfo.browser +' '+ browserInfo.browserVersion + '\n' +
+                  'Mobile: ' + browserInfo.mobile + '\n' +
+                  'Cookies: ' + browserInfo.cookies + '\n' +
+                  'Screen Size: ' + browserInfo.screen
+          );
+      */
+          var unknown = 'Unknown';
+
+          // screen
+          var screenSize = '';
+          if (screen.width) {
+              width = (screen.width) ? screen.width : '';
+              height = (screen.height) ? screen.height : '';
+              screenSize += '' + width + " x " + height;
+          }
+
+          //browser
+          var nVer = navigator.appVersion;
+          var nAgt = navigator.userAgent;
+          var browser = navigator.appName;
+          var version = '' + parseFloat(navigator.appVersion);
+          var majorVersion = parseInt(navigator.appVersion, 10);
+          var nameOffset, verOffset, ix;
+
+          // Opera
+          if ((verOffset = nAgt.indexOf('Opera')) != -1) {
+              browser = 'Opera';
+              version = nAgt.substring(verOffset + 6);
+              if ((verOffset = nAgt.indexOf('Version')) != -1) {
+                  version = nAgt.substring(verOffset + 8);
+              }
+          }
+          // MSIE
+          else if ((verOffset = nAgt.indexOf('MSIE')) != -1) {
+              browser = 'Microsoft Internet Explorer';
+              version = nAgt.substring(verOffset + 5);
+          }
+
+          //IE 11 no longer identifies itself as MS IE, so trap it
+          //http://stackoverflow.com/questions/17907445/how-to-detect-ie11
+          else if ((browser == 'Netscape') && (nAgt.indexOf('Trident/') != -1)) {
+
+              browser = 'Microsoft Internet Explorer';
+              version = nAgt.substring(verOffset + 5);
+              if ((verOffset = nAgt.indexOf('rv:')) != -1) {
+                  version = nAgt.substring(verOffset + 3);
+              }
+
+          }
+
+          // Chrome
+          else if ((verOffset = nAgt.indexOf('Chrome')) != -1) {
+              browser = 'Chrome';
+              version = nAgt.substring(verOffset + 7);
+          }
+          // Safari
+          else if ((verOffset = nAgt.indexOf('Safari')) != -1) {
+              browser = 'Safari';
+              version = nAgt.substring(verOffset + 7);
+              if ((verOffset = nAgt.indexOf('Version')) != -1) {
+                  version = nAgt.substring(verOffset + 8);
+              }
+
+              // Chrome on iPad identifies itself as Safari. Actual results do not match what Google claims
+              //  at: https://developers.google.com/chrome/mobile/docs/user-agent?hl=ja
+              //  No mention of chrome in the user agent string. However it does mention CriOS, which presumably
+              //  can be keyed on to detect it.
+              if (nAgt.indexOf('CriOS') != -1) {
+                  //Chrome on iPad spoofing Safari...correct it.
+                  browser = 'Chrome';
+                  //Don't believe there is a way to grab the accurate version number, so leaving that for now.
+              }
+          }
+          // Firefox
+          else if ((verOffset = nAgt.indexOf('Firefox')) != -1) {
+              browser = 'Firefox';
+              version = nAgt.substring(verOffset + 8);
+          }
+          // Other browsers
+          else if ((nameOffset = nAgt.lastIndexOf(' ') + 1) < (verOffset = nAgt.lastIndexOf('/'))) {
+              browser = nAgt.substring(nameOffset, verOffset);
+              version = nAgt.substring(verOffset + 1);
+              if (browser.toLowerCase() == browser.toUpperCase()) {
+                  browser = navigator.appName;
+              }
+          }
+          // trim the version string
+          if ((ix = version.indexOf(';')) != -1) version = version.substring(0, ix);
+          if ((ix = version.indexOf(' ')) != -1) version = version.substring(0, ix);
+          if ((ix = version.indexOf(')')) != -1) version = version.substring(0, ix);
+
+          majorVersion = parseInt('' + version, 10);
+          if (isNaN(majorVersion)) {
+              version = '' + parseFloat(navigator.appVersion);
+              majorVersion = parseInt(navigator.appVersion, 10);
+          }
+
+          // mobile version
+          var mobile = /Mobile|mini|Fennec|Android|iP(ad|od|hone)/.test(nVer);
+
+          // cookie
+          var cookieEnabled = (navigator.cookieEnabled) ? true : false;
+
+          if (typeof navigator.cookieEnabled == 'undefined' && !cookieEnabled) {
+              document.cookie = 'testcookie';
+              cookieEnabled = (document.cookie.indexOf('testcookie') != -1) ? true : false;
+          }
+
+          // system
+          var os = unknown;
+          var clientStrings = [
+              {s:'Windows 3.11', r:/Win16/},
+              {s:'Windows 95', r:/(Windows 95|Win95|Windows_95)/},
+              {s:'Windows ME', r:/(Win 9x 4.90|Windows ME)/},
+              {s:'Windows 98', r:/(Windows 98|Win98)/},
+              {s:'Windows CE', r:/Windows CE/},
+              {s:'Windows 2000', r:/(Windows NT 5.0|Windows 2000)/},
+              {s:'Windows XP', r:/(Windows NT 5.1|Windows XP)/},
+              {s:'Windows Server 2003', r:/Windows NT 5.2/},
+              {s:'Windows Vista', r:/Windows NT 6.0/},
+              {s:'Windows 7', r:/(Windows 7|Windows NT 6.1)/},
+              {s:'Windows 8.1', r:/(Windows 8.1|Windows NT 6.3)/},
+              {s:'Windows 8', r:/(Windows 8|Windows NT 6.2)/},
+              {s:'Windows NT 4.0', r:/(Windows NT 4.0|WinNT4.0|WinNT|Windows NT)/},
+              {s:'Windows ME', r:/Windows ME/},
+              {s:'Android', r:/Android/},
+              {s:'Open BSD', r:/OpenBSD/},
+              {s:'Sun OS', r:/SunOS/},
+              {s:'Linux', r:/(Linux|X11)/},
+              {s:'iOS', r:/(iPhone|iPad|iPod)/},
+              {s:'Mac OS X', r:/Mac OS X/},
+              {s:'Mac OS', r:/(MacPPC|MacIntel|Mac_PowerPC|Macintosh)/},
+              {s:'QNX', r:/QNX/},
+              {s:'UNIX', r:/UNIX/},
+              {s:'BeOS', r:/BeOS/},
+              {s:'OS/2', r:/OS\/2/},
+              {s:'Search Bot', r:/(nuhk|Googlebot|Yammybot|Openbot|Slurp|MSNBot|Ask Jeeves\/Teoma|ia_archiver)/}
+          ];
+          for (var id in clientStrings) {
+              var cs = clientStrings[id];
+              if (cs.r.test(nAgt)) {
+                  os = cs.s;
+                  break;
+              }
+          }
+
+          var osVersion = unknown;
+
+          if (/Windows/.test(os)) {
+              osVersion = /Windows (.*)/.exec(os)[1];
+              os = 'Windows';
+          }
+
+          switch (os) {
+              case 'Mac OS X':
+                  osVersion = /Mac OS X (10[\.\_\d]+)/.exec(nAgt)[1];
+                  break;
+
+              case 'Android':
+                  osVersion = /Android ([\.\_\d]+)/.exec(nAgt)[1];
+                  break;
+
+              case 'iOS':
+                  osVersion = /OS (\d+)_(\d+)_?(\d+)?/.exec(nVer);
+                  osVersion = osVersion[1] + '.' + osVersion[2] + '.' + (osVersion[3] | 0);
+                  break;
+
+          }
+      }
+
+      window.browserInfo = {
+          screen: screenSize,
+          browser: browser,
+          browserVersion: version,
+          mobile: mobile,
+          os: os,
+          osVersion: osVersion,
+          cookies: cookieEnabled
+      };
+  }(this));
+
+  // https://stackoverflow.com/questions/9514179/how-to-find-the-operating-system-version-using-javascript
+  $(document).ready(function(){
+    $("#osName").val(browserInfo.os +' '+ browserInfo.osVersion);
+    $("#browser").val(browserInfo.browser +' '+ browserInfo.browserVersion);
+    $("#mobile").val(browserInfo.mobile);
+    // $("#cookies").val(browserInfo.cookies);
+    $("#screenSize").val(browserInfo.screen);
+    $("#fullscreenSize").val(getResolution());
+  });
+</script>
+			
+	    	<div class="modal fade" id="modal_resolution" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Incorrect Resolution Setting</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        Please set the display resolution to 1920x1080! Otherwise you'll receive no marks for this homework.
+      </div>
+      <div class="modal-footer">
+        <!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button> -->
+        <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
+      </div>
+    </div>
+  </div>
+</div>
+<input type="hidden" name="record" id="fullscreenSize" value="unset">
+<script type="text/javascript">
+  // https://www.tutorialrepublic.com/faq/how-to-detect-screen-resolution-with-javascript.php
+  function getResolution() {
+      return window.screen.width * window.devicePixelRatio + "x" + window.screen.height * window.devicePixelRatio;
+  }
+  
+</script>
+			
+	    	<script type="text/javascript">
+  // "Please DO NOT REFRESH OR CLOSE THE WEBPAGE WHILE DOING THE STUDY. "
+  // Firefox displays the string: "This page is asking you to confirm that you want to leave - data you have entered may not be saved." Chrome displays the string: "Do you want to leave this site? Changes you made may not be saved."
+  // Credit: https://stackoverflow.com/questions/10311341/confirmation-before-closing-of-tab-browser
+  window.onbeforeunload = function (e) {
+    // Blocked alert during beforeunload
+    // alert('sa')
+    // e.preventDefault(); not working
+    if ( (thisPhase != PHASES[PHASES.length - 1] ) && (thisPhase != PHASES[0]) ) {
+      
+        $('#modalExport').modal();
+      
+
+      // $('#modalLeaving').modal('show'); not working, will show up after clicking CANCEL
+      let msg = 'The data will be lost if the session is terminated in the middle. If there is any problem, please click HELP on the top left corner.';
+
+      e = e || window.event;
+
+      // For IE and Firefox prior to version 4
+      if (e) {
+          e.returnValue = msg;
+      }
+
+      // For Safari
+      // return 'Sure?';
+      return msg;
+    }
+  };
+</script>
+			
+		</div>
+
+		
+      <script type="text/javascript">
+  function audio_check() {
+
+  }
+
+  function checkQuiz() {
+    if(validQuiz()) {
+      alert('Well done! You can proceed now :)')
+      next();
+    } else {
+      alert('You can proceed only if you answer all questions correctly.');
+    }
+  }
+  function validQuiz() {
+    // https://stackoverflow.com/questions/6920606/jquery-how-to-check-if-all-radio-buttons-in-a-div-are-selected
+    // $('[name=age]:checked').val() === undefined;
+    let ok = true;
+    $('select[name^=select]').each(function(index){
+       if (this.selectedIndex != this.getAttribute("data-answer") ) {
+          ok = false;
+       } else {
+         console.log(this.name + ' = ' + this.value + ':' + this.selectedIndex);
+       }
+    });
+    return ok;
+  }
+</script>
+
+<div id='phase:audio_check' width="100%" class="center">
+  <section class="py-5">
+    <div class="container my-auto">
+
+      <h1>Turn on the audio </h1>
+      <br>
+      Please listen to the instructions and fill in the following blanks.
+      <br>
+      <!-- Please rename the output csv file with your name and EID (Format: "Your group no." + "Your current session no." + "Your EID"+ "First Name"+ "LastName".csv, Please keep the "+"sign.), and submit through Canvas before end of Thursday, Nov. 12th. -->
+      <audio controls>
+        <source src="instruction.mp3" type="audio/mpeg">
+        Your browser does not support the audio tag.
+      </audio>
+
+      <ol>
+          <li>
+            Please <b>keep the sound on </b> when playing the videos.
+          </li>
+          <li>After each video has been played, a rating slider bar will appear,
+            calibrated on a <b>continuous scale (0-100)</b> from low quality to high quality.
+            To guide you, we place
+            <select name="select_5_pointes" data-answer=3>
+              <option disabled selected value> -- select an option -- </option>
+              <option>3 pointers - "BAD," "FAIR," and "GOOD," </option>
+              <option>4 pointers - "BAD," "FAIR," "GOOD," and "EXCELLENT" </option>
+              <option>5 pointers - "BAD," "POOR," "FAIR," "GOOD," and "EXCELLENT" </option>
+            </select> at equal intervals on the bar
+          </li>
+          <li>The initial position of the slider marker is placed
+            <select name="select_at_random" data-answer=4>
+              <option disabled selected value> -- select an option -- </option>
+              <option>at a fixed value</option>
+              <option>at zero</option>
+              <option>randomly</option>
+              <option>at random</option>
+            </select>
+            </li>
+          <li>
+             You are evaluating each video based on its
+             <select name="select_quality"  data-answer=2>
+              <option disabled selected value> -- select an option -- </option>
+              <option>content (what is in the video)</option>
+              <option>quality (how good the video perceives)</option>
+              <option>aesthetics (how good the video scene is framed)</option>
+            </select>
+          </li>
+          <li>Rate the video by clicking the score (position) you think best represents the quality of the video.
+            NOTE THAT YOU MAY MOVE THE MARKER:
+            <select name="select_anywhere"  data-answer=1>
+              <option disabled selected value> -- select an option -- </option>
+              <option>ANYWHERE ON THE SLIDER</option>
+              <option><b>NOT ONLY</b> AT THE 5 POINTERS (BAD-EXCELLENT)</option>
+            </select>
+          </li>
+          <li>Click the submit button. You will NOT be able to submit your rating and proceed to the next video unless you have moved the cursor. </li>
+          <li>Please do not give random ratings, because we will detect this and boot you from the study. </li>
+          <!-- <li>Please take this study seriously and do not give random ratings, we will detect this. </li> -->
+      </ol>
+
+        <button type="button" id="nextButton" class="btn btn-primary btn-xl nextButton" onclick="checkQuiz()">
+          <span style='font-size:16pt'>Submit</span>
+        </button>
+    </div>
+  </section>
+</div>
+		
+      <script type="text/javascript">
+  function done() {
+    document.dispatchEvent(new Event('session_end'));
+  	// configuration and thanks
+    currentVid = null;
+  
+  	$('#done').show();
+  	// $('#survey_box').animate({right: '-100%'});
+  	$('#survey').hide();
+  	$('#divNextButton').hide();
+  	$("#submitButton").show();
+    $("#submitButton").prop('disabled', false);
+  	$("#submitButton").css("visibility", "visible");
+  	$('<input/>').attr({type:'hidden',name:'welldone',value:'yes'}).appendTo('#survey');
+  	// closeFullscreen();
+    
+    
+  	closeFullscreen();
+  	
+  }
+</script>
+
+<div id='phase:done' width="100%" class="center">
+  <section class="py-5">
+    <div class="container my-auto">
+
+      <h1>Thank you so much for your participation!</h1>
+      <br>
+      Your results should have been downloaded. If not, please click <u onclick="saveAsCSV()">here</u>.
+      Please email the result file to <a href="mailto:zqying@utexas.edu">zqying@utexas.edu</a>.
+      You can close this page after saving the result.
+      <br>
+      <!-- Please rename the output csv file with your name and EID (Format: "Your group no." + "Your current session no." + "Your EID"+ "First Name"+ "LastName".csv, Please keep the "+"sign.), and submit through Canvas before end of Thursday, Nov. 12th. -->
+      <br>
+
+    </div>
+  </section>
+</div>
+		
+		<div id='phase:reject' class="center">
+  <section class="py-5">
+    <div class="container my-auto">
+      <h1> Sorry!</h1>
+      You are not able to proceed because:
+      <p id='reasonRejected'></p>
+    </div>
+  </section>
+</div>
+<script type="text/javascript">
+  function reject(msg="You may have violated one of our Ethics policies.", retry=true) {
+    $('div[id^=phase]').hide();
+  	$('#phase\\:reject').show();
+  	// console.log('user [' + $.getUrlVar('assignmentId') + '] rejected because of ' + msg);
+  	$('#reasonRejected').html(msg);
+   	// $('#submitButton').remove();
+   	// record information?
+   	// $('#divNextButton').hide();
+  	// phase = 'reject'
+  }
+</script>
+
+		
+    <input type="hidden" name="videos1" id="videos1" value="unset">
+		
+    <input type="hidden" name="videos2" id="videos2" value="unset">
+		
+    <input type="hidden" name="videos3" id="videos3" value="unset">
+		
+    <input type="hidden" name="videos4" id="videos4" value="unset">
+		
+    <input type="hidden" name="videos5" id="videos5" value="unset">
+		
+    <input type="hidden" name="videos6" id="videos6" value="unset">
+		
+
+		
+
+  </body>
+</html>
