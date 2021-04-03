@@ -777,6 +777,9 @@ $(document).ready(function(){
 
   function checkQuiz() {
     if(validQuiz()) {
+      const audio = document.querySelector("#audio");
+      audio.pause();
+      audio.currentTime = 0;
       alert('Well done! You can proceed now :)')
       next();
     } else {
@@ -805,10 +808,10 @@ $(document).ready(function(){
       <h1>Turn on the audio </h1>
       <br>
       Please click the play button and listen to the instructions,
-      fill in the following blanks accordingly, and click submit after filling in all blanks. 
+      fill in the following blanks accordingly, and click submit after filling in all blanks.
       <br>
       <!-- Please rename the output csv file with your name and EID (Format: "Your group no." + "Your current session no." + "Your EID"+ "First Name"+ "LastName".csv, Please keep the "+"sign.), and submit through Canvas before end of Thursday, Nov. 12th. -->
-      <audio controls autoplay>
+      <audio controls autoplay id="audio">
         <source src="instruction.mp3" type="audio/mpeg">
         Your browser does not support the audio tag.
       </audio>
@@ -828,11 +831,10 @@ $(document).ready(function(){
             </select> at equal intervals on the bar
           </li>
           <li>The initial position of the slider marker is placed
-            <select name="select_at_random" data-answer=4>
+            <select name="select_at_random" data-answer=3>
               <option disabled selected value> -- select an option -- </option>
               <option>at a fixed value</option>
               <option>at zero</option>
-              <option>randomly</option>
               <option>at random</option>
             </select>
             </li>
@@ -841,8 +843,8 @@ $(document).ready(function(){
              <select name="select_quality"  data-answer=2>
               <option disabled selected value> -- select an option -- </option>
               <option>content (what is in the video)</option>
-              <option>quality (how good the video perceives)</option>
-              <option>aesthetics (how good the video scene is framed)</option>
+              <option>quality (how much the video is distorted)</option>
+              <option>aesthetics (how well the video is framed)</option>
             </select>
           </li>
           <li>Rate the video by clicking the score (position) you think best represents the quality of the video.
@@ -850,7 +852,7 @@ $(document).ready(function(){
             <select name="select_anywhere"  data-answer=1>
               <option disabled selected value> -- select an option -- </option>
               <option>ANYWHERE ON THE SLIDER</option>
-              <option><b>NOT ONLY</b> AT THE 5 POINTERS (BAD-EXCELLENT)</option>
+              <option><b>ONLY</b> AT THE 5 POINTERS (BAD-EXCELLENT)</option>
             </select>
           </li>
           <li>Click the submit button. You will NOT be able to submit your rating and proceed to the next video unless you have moved the cursor. </li>
